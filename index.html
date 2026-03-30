@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.8</title>
+    <title>Tic Tac Toe Bolt v. 2.9</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -18,7 +18,8 @@
         
         #statusHeader { margin-top: 60px; margin-bottom: 30px; }
         .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; z-index: 100; cursor: pointer; color: #444; transition: 0.3s; }
-        
+        .back-btn:hover { color: #fff; }
+
         .board { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
             width: 340px; height: 340px; position: relative; margin-bottom: 30px;
@@ -47,11 +48,11 @@
         
         @keyframes question-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-        .option-btn { width: 100%; py: 20px; border-radius: 20px; border: 2px solid #27272a; font-size: 1.5rem; font-weight: 800; transition: 0.3s; background: transparent; color: white; padding: 15px; }
+        .option-btn { width: 100%; border-radius: 20px; border: 2px solid #27272a; font-size: 1.5rem; font-weight: 800; transition: 0.3s; background: transparent; color: white; padding: 15px; }
         .correct-anim { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.2) !important; box-shadow: 0 0 20px #22c55e; }
         .wrong-anim { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.2) !important; box-shadow: 0 0 20px #ef4444; }
         
-        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; }
+        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; }
         .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
@@ -93,7 +94,7 @@
             <h2 class="text-[#facc15] text-2xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-lg space-y-4 mb-8">
                 <li>⚡ <b>רק 3 סימנים:</b> בסימן ה-4, הראשון נעלם!</li>
-                <li>⚡ <b>ענו על שאלה:</b> לחצו על סימן השאלה כדי לקבל תור.</li>
+                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל תור. צבעו משתנה לפי השחקן.</li>
             </ul>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
         </div>
@@ -112,14 +113,13 @@
     </div>
 
     <div id="winModal" class="modal text-center">
-        <h2 id="winTitle" class="text-6xl font-black mb-4"></h2>
-        <div id="winnerIcon" class="text-9xl mb-8"></div>
+        <h2 id="winTitle" class="text-6xl font-black mb-6"></h2>
+        <div id="winnerIcon" class="text-9xl mb-10"></div>
         <button onclick="location.reload()" class="btn-main border-[#facc15] text-[#facc15]">משחק חדש</button>
     </div>
 
     <script>
         let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
-        let speedInterval;
 
         window.onload = () => {
             const saved = localStorage.getItem('ttt_vocab');
@@ -173,11 +173,9 @@
                 if(!opts.includes(r)) opts.push(r);
             }
             opts.sort(() => Math.random() - 0.5);
-            
             const qT = document.getElementById('qText');
             qT.textContent = item.en;
             qT.className = `text-7xl font-black mb-16 italic text-center ${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}`;
-            
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
@@ -191,15 +189,12 @@
 
         function handleAnswer(isCorrect, clickedBtn, correctHe) {
             const btns = document.querySelectorAll('.option-btn');
-            
             if(isCorrect) {
                 clickedBtn.classList.add('correct-anim');
                 setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
             } else {
-                // מציג מה נכון ומה טעית
                 clickedBtn.classList.add('wrong-anim');
                 btns.forEach(b => { if(b.textContent === correctHe) b.classList.add('correct-anim'); });
-                
                 document.getElementById('quizModal').classList.add('shake');
                 setTimeout(() => { 
                     hideModal('quizModal'); 
@@ -220,10 +215,11 @@
         function triggerWin() {
             confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
             const title = document.getElementById('winTitle');
-            title.textContent = `${turn} לנצח!`;
-            title.className = `text-7xl font-black mb-4 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            // תיקון ניסוח הניצחון לעברית תקינה
+            title.textContent = `ניצחון ל-${turn}!`;
+            title.className = `text-6xl font-black mb-6 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
-            document.getElementById('winnerIcon').className = `text-9xl mb-8 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            document.getElementById('winnerIcon').className = `text-9xl mb-10 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             setTimeout(() => showModal('winModal'), 600);
         }
 
