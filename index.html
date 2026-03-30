@@ -3,37 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Clear Quiz Edition</title>
+    <title>Super Tic Tac Toe - Strategic Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        /* לוח המשחק */
-        .grid-container { display: grid; grid-template-columns: 40px 320px; grid-template-rows: 40px 320px; gap: 10px; margin: 0 auto; }
+        /* מרכז את הלוח כולל המספור */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: 40px 320px; 
+            grid-template-rows: 40px 320px; 
+            gap: 10px; 
+            margin: 0 auto;
+            position: relative;
+            left: -20px; /* קיזוז עבור עמודת האותיות כדי שמרכז ה-320px יהיה במרכז המסך */
+        }
+
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
         .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
         .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff, 0 0 10px #fff, 0 106px 10px #fff; }
 
-        /* סימני חרבות אור בלוח בלבד */
         .cell { display: flex; align-items: center; justify-content: center; font-size: 6rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
         .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
 
-        /* צבעים נקיים למילים בשאלה (ללא זוהר) */
         .text-x-clean { color: #00f2ff; }
         .text-o-clean { color: #bc13fe; }
 
-        /* כפתורי תפריט */
         .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 12px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
         .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
-        .btn-outline-cyan { border-color: #00f2ff; color: #00f2ff; }
-        .btn-outline-purple { border-color: #bc13fe; color: #bc13fe; }
-        .btn-main:active { transform: scale(0.95); }
+        
+        /* כפתור "לשאלה הבאה" */
+        #nextQuestionBtn {
+            position: absolute; bottom: 80px; z-index: 50;
+            border-color: #facc15; color: #facc15;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+            background: rgba(250, 204, 21, 0.1);
+            animation: pulse-button 2s infinite;
+        }
+        @keyframes pulse-button { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .axis-label { color: #555; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
@@ -48,8 +61,8 @@
         <h1 class="text-[#bc13fe] text-5xl font-black italic mb-14 tracking-tighter" style="text-shadow: 0 0 15px #bc13fe;">TIC TAC TOE</h1>
         <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow text-lg">הכנסת מילים</button>
         <button onclick="startGame('pvp')" class="btn-main btn-outline-multi text-xl">2 שחקנים</button>
-        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-purple text-xl">שחקן VS מחשב (מאתגר)</button>
-        <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-cyan text-lg">שחקן VS מחשב (קל)</button>
+        <button onclick="startGame('pvc', 'hard')" class="btn-main text-xl" style="border-color: #bc13fe; color: #bc13fe;">שחקן VS מחשב (מאתגר)</button>
+        <button onclick="startGame('pvc', 'easy')" class="btn-main text-lg" style="border-color: #00f2ff; color: #00f2ff;">שחקן VS מחשב (קל)</button>
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
@@ -60,7 +73,10 @@
             <div class="flex flex-col h-full justify-around"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
             <div id="mainBoard" class="board"></div>
         </div>
-        <button onclick="location.reload()" class="mt-12 text-zinc-600 underline font-bold">חזרה לתפריט</button>
+        
+        <button id="nextQuestionBtn" onclick="showQuiz()" class="btn-main hidden">לחץ לשאלה הבאה</button>
+        
+        <button onclick="location.reload()" class="mt-20 text-zinc-600 underline font-bold">חזרה לתפריט</button>
     </div>
 
     <div id="vocabModal" class="modal">
@@ -130,15 +146,18 @@
         function startTurn() {
             if (gameMode === 'pvc' && turn === 'O') {
                 document.getElementById('statusHeader').textContent = "המחשב חושב...";
+                document.getElementById('nextQuestionBtn').classList.add('hidden');
                 setTimeout(aiAction, 1000);
             } else {
                 let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
                 document.getElementById('statusHeader').innerHTML = `תור: <span id="turnInfo" class="${colorClass}">${turn}</span>`;
-                showQuiz();
+                // במקום להציג שאלה מיד, נציג את הכפתור
+                document.getElementById('nextQuestionBtn').classList.remove('hidden');
             }
         }
 
         function showQuiz() {
+            document.getElementById('nextQuestionBtn').classList.add('hidden');
             const item = vocab[Math.floor(Math.random() * vocab.length)];
             const opts = [item.he];
             while(opts.length < Math.min(4, vocab.length)) {
@@ -147,7 +166,6 @@
             }
             opts.sort(() => Math.random() - 0.5);
             
-            // עדכון: המילה בשאלה צבעונית אך ללא זוהר
             const qEl = document.getElementById('qText');
             qEl.textContent = item.en;
             qEl.className = `text-7xl font-black mb-16 italic text-center px-6 ${turn === 'X' ? 'text-x-clean' : 'text-o-clean'}`;
