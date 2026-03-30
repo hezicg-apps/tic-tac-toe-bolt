@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe v. 1.9</title>
+    <title>Super Tic Tac Toe v. 1.9.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -19,13 +19,13 @@
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
         .btn-main { width: 300px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 15px; border: 2px solid; cursor: pointer; transition: 0.2s; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .correct-pulse { animation: pulse-green 0.6s infinite; border-color: #22c55e !important; }
         @keyframes pulse-green { 0%, 100% { box-shadow: 0 0 0px #22c55e; } 50% { box-shadow: 0 0 20px #22c55e; } }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
         .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
-        .ltr { direction: ltr; }
+        .ltr-fix { direction: ltr; display: inline-flex; flex-direction: row-reverse; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
@@ -33,13 +33,20 @@
     <div id="speedTimer" class="timer-bar"></div>
 
     <div id="lobby" class="modal" style="display: flex;">
-        <div class="absolute top-5 text-zinc-600 font-mono">v. 1.9</div>
+        <div class="absolute top-5 text-zinc-600 font-mono ltr-fix" style="flex-direction: row;">v. 1.9.1</div>
         <h1 class="text-[#00f2ff] text-7xl font-black italic mb-2">SUPER</h1>
         <h1 class="text-[#bc13fe] text-4xl font-black italic mb-10">TIC TAC TOE</h1>
         <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
         <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
-        <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
-        <button onclick="startGame('pvc')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
+        <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500 gap-2">Speed Run ⚡</button>
+        <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
+    </div>
+
+    <div id="aiDifficultyModal" class="modal">
+        <h2 class="text-white text-3xl font-black mb-8 italic">בחר רמת קושי</h2>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'easy')" class="btn-main border-[#00f2ff] text-[#00f2ff]">קל</button>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
+        <button onclick="hideModal('aiDifficultyModal')" class="text-zinc-500 mt-4">ביטול</button>
     </div>
 
     <div id="vocabModal" class="modal">
@@ -55,7 +62,7 @@
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
         <button onclick="location.reload()" class="absolute top-5 right-5 text-4xl">➔</button>
-        <div id="statusHeader" class="mb-6 text-3xl font-black italic ltr"></div>
+        <div id="statusHeader" class="mb-6 text-3xl font-black italic ltr-fix"></div>
         <div class="grid-container">
             <div></div><div class="grid grid-cols-3 w-full"><div class="text-zinc-800 text-center">1</div><div class="text-zinc-800 text-center">2</div><div class="text-zinc-800 text-center">3</div></div>
             <div class="flex flex-col justify-around text-zinc-800 pr-2"><div>A</div><div>B</div><div>C</div></div>
@@ -70,7 +77,7 @@
     </div>
 
     <div id="winModal" class="modal text-center">
-        <h2 id="winTitle" class="text-6xl font-black mb-4 ltr"></h2>
+        <h2 id="winTitle" class="text-6xl font-black mb-4 ltr-fix"></h2>
         <div id="winnerIcon" class="text-9xl mb-8"></div>
         <div id="statsBox" class="bg-zinc-900 p-4 rounded-2xl w-80 mb-8 border border-zinc-700">
             <h3 class="text-zinc-400 text-sm mb-2">מילים שדורשות תרגול:</h3>
@@ -80,7 +87,7 @@
     </div>
 
     <script>
-        let vocab = [], gameMode = 'pvp', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
+        let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
         let stats = {}, speedInterval;
 
         window.onload = () => {
@@ -100,9 +107,10 @@
             return vocab.length >= 2;
         }
 
-        function startGame(mode) {
+        function startGame(mode, diff = 'hard') {
             if(!parseVocab()) { alert("נא להכניס מילים."); return; }
-            gameMode = mode; hideModal('lobby'); 
+            gameMode = mode; difficulty = diff;
+            hideModal('lobby'); 
             document.getElementById('gameUI').classList.replace('hidden', 'flex');
             initBoard(); startTurn();
         }
@@ -167,7 +175,7 @@
                 setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
             } else {
                 if(btn) btn.style.borderColor = '#ef4444';
-                stats[item.en] = (stats[item.en] || 0) + 1;
+                if(item.en !== 'Timeout') stats[item.en] = (stats[item.en] || 0) + 1;
                 document.getElementById('quizModal').classList.add('shake');
                 Array.from(document.getElementById('qOptions').children).forEach(b => {
                     if(b.textContent === item.he) b.classList.add('correct-pulse');
@@ -191,8 +199,9 @@
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             const title = document.getElementById('winTitle');
             title.textContent = `${turn} - wins!`;
-            title.className = `text-6xl font-black mb-4 ltr ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            title.className = `text-6xl font-black mb-4 ltr-fix ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
+            document.getElementById('winnerIcon').className = `text-9xl mb-8 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             
             const hard = Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
             document.getElementById('hardWords').textContent = hard.length ? hard.join(', ') : 'אין טעויות! כל הכבוד!';
@@ -215,8 +224,33 @@
         }
 
         function aiAction() {
-            const av = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-            if(av.length) makeMove(av[Math.floor(Math.random()*av.length)]);
+            let m;
+            if(difficulty === 'easy') {
+                const av = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+                m = av[Math.floor(Math.random()*av.length)];
+            } else {
+                let bestS = -Infinity;
+                for(let i=0; i<9; i++) {
+                    if(board[i] === "") {
+                        board[i] = "O"; let s = minimax(board, 0, false); board[i] = "";
+                        if(s > bestS) { bestS = s; m = i; }
+                    }
+                }
+            }
+            if(m !== undefined) makeMove(m);
+        }
+
+        function minimax(b, d, isMax) {
+            if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 4) return 0;
+            let best = isMax ? -Infinity : Infinity;
+            for(let i=0; i<9; i++) {
+                if(b[i] === "") {
+                    b[i] = isMax ? "O" : "X";
+                    let s = minimax(b, d+1, !isMax);
+                    b[i] = ""; best = isMax ? Math.max(best, s) : Math.min(best, s);
+                }
+            }
+            return best;
         }
 
         function exportWords() {
