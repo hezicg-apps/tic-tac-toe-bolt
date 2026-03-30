@@ -8,143 +8,184 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body, html { 
-            background: #050505; color: #fff; font-family: 'Varela Round', sans-serif; 
-            margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; 
-        }
-        .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.98); z-index: 100; }
-        .active-screen { display: flex; }
+        body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        .btn-ui { 
-            width: 280px; padding: 16px; border-radius: 20px; font-weight: 900; 
-            border: 2px solid; margin-bottom: 12px; cursor: pointer; text-align: center; 
-            transition: transform 0.1s; 
-        }
-        .btn-ui:active { transform: scale(0.95); }
+        #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .logo-container { margin-top: 40px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+        .bolt-text { margin-bottom: 15px; }
 
-        /* לוח משחק */
-        .grid-bolt {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 12px; width: 90vw; max-width: 380px; aspect-ratio: 1/1;
-            background: #111; padding: 12px; border-radius: 20px; border: 2px solid #333;
-        }
-        .cell {
-            background: #000; border-radius: 12px; display: flex; align-items: center; 
-            justify-content: center; font-size: 4rem; font-weight: 900; cursor: pointer;
-        }
-        .x-sign { color: #00f2ff; text-shadow: 0 0 15px #00f2ff; }
-        .o-sign { color: #bc13fe; text-shadow: 0 0 15px #bc13fe; }
-        .ghost { opacity: 0.25; filter: blur(2px); }
+        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
+        
+        #statusHeader { margin-top: 60px; margin-bottom: 30px; }
+        .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; z-index: 100; cursor: pointer; color: #444; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
 
-        /* כפתור חזרה גלובלי */
-        .back-nav {
-            position: absolute; top: 25px; right: 25px; font-size: 2rem; 
-            color: #555; cursor: pointer; z-index: 1000;
+        .board { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            width: 340px; height: 340px; position: relative; margin-bottom: 30px;
         }
+        .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
+        .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 113px 0 0 #fff, 0 0 10px #fff, 113px 0 10px #fff; }
+        .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 113px 0 #fff, 0 0 10px #fff, 0 113px 10px #fff; }
+        
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 6.5rem; font-weight: 900; width: 113px; height: 113px; cursor: pointer; z-index: 10; }
+        .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
+        .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
+        .ghost { opacity: 0.15; filter: blur(2px); }
+        
+        .btn-main { width: 300px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 15px; border: 2px solid; cursor: pointer; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        .glow-q-btn {
+            width: 95px; height: 95px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05); border: 5px solid #facc15;
+            color: #facc15; font-size: 4.5rem; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; animation: question-pulse 2s infinite;
+        }
+        .q-turn-x { border-color: #00f2ff; color: #00f2ff; box-shadow: 0 0 20px #00f2ff; }
+        .q-turn-o { border-color: #bc13fe; color: #bc13fe; box-shadow: 0 0 20px #bc13fe; }
+        
+        @keyframes question-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-        .q-btn {
-            width: 90px; height: 90px; border-radius: 50%; border: 4px solid #facc15;
-            color: #facc15; font-size: 4rem; font-weight: 900; display: flex; 
-            align-items: center; justify-content: center; margin-top: 30px; 
-            animation: pulse 2s infinite; cursor: pointer;
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .option-btn { width: 100%; border-radius: 20px; border: 2px solid #27272a; font-size: 1.5rem; font-weight: 800; transition: 0.3s; background: transparent; color: white; padding: 15px; }
+        .correct-anim { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.2) !important; box-shadow: 0 0 20px #22c55e; }
+        .wrong-anim { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.2) !important; box-shadow: 0 0 20px #ef4444; }
+        
+        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; }
+        .timer-bar { position: fixed; top: 0; left: 0; height: 10px; background: #facc15; width: 0%; z-index: 3000; box-shadow: 0 0 15px #facc15; transition: width 0.1s linear; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
 
-    <div id="lobby" class="screen active-screen">
-        <div class="text-center mb-12">
-            <h1 class="text-[#facc15] text-8xl font-black italic">BOLT</h1>
-            <p class="text-white opacity-50 tracking-widest text-xl">TIC TAC TOE</p>
+    <div id="speedTimer" class="timer-bar"></div>
+
+    <!-- מסך ראשי -->
+    <div id="lobby" class="modal" style="display: flex;">
+        <div onclick="showModal('helpModal')" class="help-btn">?</div>
+        <div class="logo-container">
+            <h1 class="text-[#00f2ff] text-5xl font-black italic mb-1">TIC TAC TOE</h1>
+            <h1 class="text-[#facc15] text-8xl font-black italic bolt-text" style="text-shadow: 0 0 30px #facc15;">BOLT</h1>
+            <div class="text-6xl">⚡</div>
         </div>
-        <textarea id="vIn" class="w-72 h-32 bg-zinc-900 border-2 border-zinc-700 text-white p-3 rounded-xl mb-6 text-right outline-none focus:border-[#facc15]" placeholder="dog - כלב"></textarea>
-        <button onclick="navTo('game-type')" class="btn-ui border-[#facc15] text-[#facc15]">שחק עכשיו</button>
+        <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
+        <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
+        <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
+        <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
     </div>
 
-    <div id="game-type" class="screen">
-        <div class="back-nav" onclick="navTo('lobby')">➔</div>
-        <h2 class="text-3xl font-black mb-10 italic">בחר מצב משחק</h2>
-        <button onclick="startGame('pvp')" class="btn-ui border-white text-white">2 שחקנים (אותו מכשיר)</button>
-        <button onclick="navTo('ai-difficulty')" class="btn-ui border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
+    <!-- מסך המשחק -->
+    <div id="gameUI" class="hidden flex-col items-center h-full">
+        <div onclick="backToLobby()" class="back-btn">➔</div>
+        <div id="statusHeader" class="text-5xl font-black italic"></div>
+        <div class="game-wrapper">
+            <div id="mainBoard" class="board"></div>
+            <div id="nextQuestionBtn" onclick="showQuiz()" class="glow-q-btn hidden">?</div>
+        </div>
     </div>
 
-    <div id="ai-difficulty" class="screen">
-        <div class="back-nav" onclick="navTo('game-type')">➔</div>
-        <h2 class="text-3xl font-black mb-10 italic">רמת קושי</h2>
-        <button onclick="startGame('pvc', 'easy')" class="btn-ui border-[#00f2ff] text-[#00f2ff]">קל</button>
-        <button onclick="startGame('pvc', 'hard')" class="btn-ui border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
+    <!-- מודאל שאלה -->
+    <div id="quizModal" class="modal">
+        <div id="qText" class="text-7xl font-black mb-16 italic text-center" style="direction: ltr;"></div>
+        <div id="qOptions" class="flex flex-col gap-5 w-80"></div>
     </div>
 
-    <div id="game-screen" class="screen">
-        <div class="back-nav" onclick="location.reload()">➔</div>
-        <div id="status" class="text-4xl font-black italic mb-8"></div>
-        <div id="board" class="grid-bolt"></div>
-        <div id="qBtn" onclick="showQuiz()" class="q-btn">?</div>
+    <!-- מודאל הסבר -->
+    <div id="helpModal" class="modal">
+        <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-[#facc15] max-w-sm text-center">
+            <h2 class="text-[#facc15] text-2xl font-black mb-4">איך משחקים?</h2>
+            <ul class="text-right text-lg space-y-4 mb-8">
+                <li>⚡ <b>רק 3 סימנים:</b> בסימן ה-4, הראשון נעלם!</li>
+                <li>⚡ <b>Speed Run:</b> יש לכם 5 שניות לענות על שאלה!</li>
+            </ul>
+            <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
+        </div>
     </div>
 
-    <div id="quiz-modal" class="screen" style="background: rgba(0,0,0,0.99);">
-        <div id="qWord" class="text-6xl font-black mb-12 italic" dir="ltr"></div>
-        <div id="qOptions" class="flex flex-col gap-4 w-80"></div>
+    <!-- מודאל קושי (עם כפתור חזרה) -->
+    <div id="aiDifficultyModal" class="modal">
+        <div onclick="hideModal('aiDifficultyModal')" class="back-btn">➔</div>
+        <h2 class="text-white text-3xl font-black mb-8 italic">רמת קושי</h2>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'easy')" class="btn-main border-[#00f2ff] text-[#00f2ff]">קל</button>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
     </div>
 
-    <div id="win-modal" class="screen">
-        <h2 id="winMsg" class="text-7xl font-black mb-10"></h2>
-        <button onclick="location.reload()" class="btn-ui border-[#facc15] text-[#facc15]">חזרה לתפריט</button>
+    <!-- מודאל מילים (עם כפתור חזרה) -->
+    <div id="vocabModal" class="modal">
+        <div onclick="hideModal('vocabModal')" class="back-btn">➔</div>
+        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">רשימת מילים</h2>
+        <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-80 h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none focus:border-[#facc15]"></textarea>
+        <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור</button>
+    </div>
+
+    <!-- מודאל ניצחון -->
+    <div id="winModal" class="modal text-center">
+        <h2 id="winTitle" class="text-6xl font-black mb-6"></h2>
+        <div id="winnerIcon" class="text-9xl mb-10"></div>
+        <button onclick="backToLobby()" class="btn-main border-[#facc15] text-[#facc15]">חזרה לתפריט</button>
     </div>
 
     <script>
-        let vocab = [], turn = "X", canMove = false, isGameOver = false;
-        let mode = 'pvp', diff = 'hard';
-        let board = Array(9).fill("");
-        let history = { X: [], O: [] };
+        let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
+        let timeLeft = 100, speedInterval;
 
         window.onload = () => {
-            const saved = localStorage.getItem('ttt_bolt_v3');
-            document.getElementById('vIn').value = saved || "Apple - תפוח\nDog - כלב\nSun - שמש\nBook - ספר\nWater - מים";
+            const saved = localStorage.getItem('ttt_vocab');
+            if(saved) document.getElementById('vIn').value = saved;
         };
 
-        function navTo(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(screenId).classList.add('active-screen');
+        const showModal = id => document.getElementById(id).style.display = 'flex';
+        const hideModal = id => document.getElementById(id).style.display = 'none';
+
+        function backToLobby() {
+            clearInterval(speedInterval);
+            hideModal('winModal');
+            hideModal('quizModal');
+            document.getElementById('gameUI').classList.replace('flex', 'hidden');
+            showModal('lobby');
+            // איפוס מצב משחק
+            isGameOver = false;
+            board = Array(9).fill("");
+            history = {X:[], O:[]};
+            turn = "X";
         }
 
-        function startGame(gMode, gDiff = 'hard') {
+        function parseVocab() {
             const raw = document.getElementById('vIn').value;
-            localStorage.setItem('ttt_bolt_v3', raw);
             vocab = raw.split('\n').map(l => {
-                const p = l.split(/[-:]/);
+                const p = l.split(/[–\-\—:]/);
                 return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
+            return vocab.length >= 2;
+        }
 
-            if(vocab.length < 2) return alert("הזן לפחות 2 מילים");
-
-            mode = gMode; diff = gDiff;
-            navTo('game-screen');
-            initBoard();
-            nextTurn();
+        function startGame(mode, diff = 'hard') {
+            if(!parseVocab()) { alert("נא להכניס מילים."); return; }
+            gameMode = mode; difficulty = diff;
+            hideModal('lobby'); 
+            document.getElementById('gameUI').classList.replace('hidden', 'flex');
+            initBoard(); startTurn();
         }
 
         function initBoard() {
-            const b = document.getElementById('board');
-            b.innerHTML = '';
+            const b = document.getElementById('mainBoard'); b.innerHTML = '';
             for(let i=0; i<9; i++) {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                c.onclick = () => makeMove(i);
+                const c = document.createElement('div'); c.className = 'cell';
+                c.onclick = () => { if(canMove && !isGameOver) makeMove(i); };
                 b.appendChild(c);
             }
         }
 
-        function nextTurn() {
-            canMove = false;
-            const color = turn === "X" ? "#00f2ff" : "#bc13fe";
-            document.getElementById('status').innerHTML = `<span style="color:${color}">תור ${turn}</span>`;
-            document.getElementById('qBtn').style.borderColor = color;
-            document.getElementById('qBtn').style.color = color;
-            document.getElementById('qBtn').style.display = 'flex';
-            render();
-            if(mode === 'pvc' && turn === 'O') setTimeout(aiMove, 800);
+        function startTurn() {
+            if(isGameOver) return;
+            const btn = document.getElementById('nextQuestionBtn');
+            const cls = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
+            document.getElementById('statusHeader').innerHTML = `<span class="${cls}">תור ${turn}</span>`;
+            btn.className = `glow-q-btn ${turn === 'X' ? 'q-turn-x' : 'q-turn-o'}`;
+            btn.classList.remove('hidden');
+            if(gameMode === 'pvc' && turn === 'O') setTimeout(aiAction, 800);
         }
 
         function showQuiz() {
@@ -155,78 +196,121 @@
                 if(!opts.includes(r)) opts.push(r);
             }
             opts.sort(() => Math.random() - 0.5);
-
-            document.getElementById('qWord').textContent = item.en;
-            document.getElementById('qWord').style.color = turn === 'X' ? '#00f2ff' : '#bc13fe';
-            
-            const container = document.getElementById('qOptions');
-            container.innerHTML = '';
+            const qT = document.getElementById('qText');
+            qT.textContent = item.en;
+            qT.className = `text-7xl font-black mb-16 italic text-center ${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}`;
+            const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
-                const b = document.createElement('div');
-                b.className = 'btn-ui border-zinc-700 text-white';
-                b.textContent = o;
-                b.onclick = () => {
-                    if(o === item.he) {
-                        b.style.borderColor = '#22c55e';
-                        setTimeout(() => { navTo('game-screen'); canMove = true; document.getElementById('qBtn').style.display = 'none'; }, 600);
-                    } else {
-                        b.style.borderColor = '#ef4444';
-                        Array.from(container.children).forEach(c => { if(c.textContent === item.he) c.style.borderColor = '#22c55e'; });
-                        setTimeout(() => { navTo('game-screen'); switchTurn(); }, 1400);
-                    }
-                };
-                container.appendChild(b);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = o;
+                btn.onclick = () => handleAnswer(o === item.he, btn, item.he);
+                container.appendChild(btn);
             });
-            navTo('quiz-modal');
+            showModal('quizModal');
+            if(gameMode === 'speed') startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 100;
+            document.getElementById('speedTimer').style.width = "100%";
+            clearInterval(speedInterval);
+            speedInterval = setInterval(() => {
+                timeLeft -= 2;
+                document.getElementById('speedTimer').style.width = timeLeft + "%";
+                if(timeLeft <= 0) {
+                    clearInterval(speedInterval);
+                    handleAnswer(false, null, ""); 
+                }
+            }, 100);
+        }
+
+        function handleAnswer(isCorrect, clickedBtn, correctHe) {
+            clearInterval(speedInterval);
+            document.getElementById('speedTimer').style.width = "0%";
+            const btns = document.querySelectorAll('.option-btn');
+            
+            if(isCorrect) {
+                if(clickedBtn) clickedBtn.classList.add('correct-anim');
+                setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
+            } else {
+                if(clickedBtn) clickedBtn.classList.add('wrong-anim');
+                btns.forEach(b => { if(b.textContent === correctHe) b.classList.add('correct-anim'); });
+                document.getElementById('quizModal').classList.add('shake');
+                setTimeout(() => { 
+                    hideModal('quizModal'); 
+                    document.getElementById('quizModal').classList.remove('shake');
+                    switchTurn(); 
+                }, 1400);
+            }
         }
 
         function makeMove(i) {
-            if(!canMove || isGameOver || board[i] !== "") return;
-            
-            board[i] = turn;
-            history[turn].push(i);
-            
-            if(history[turn].length > 3) {
-                const first = history[turn].shift();
-                board[first] = "";
-            }
-
-            if(checkWin(turn)) {
-                render();
-                isGameOver = true;
-                confetti({ particleCount: 150, spread: 70 });
-                document.getElementById('winMsg').textContent = `ניצחון ל-${turn}!`;
-                document.getElementById('winMsg').style.color = turn === 'X' ? '#00f2ff' : '#bc13fe';
-                setTimeout(() => navTo('win-modal'), 800);
-                return;
-            }
-
-            switchTurn();
+            if(board[i] !== "") return;
+            board[i] = turn; history[turn].push(i);
+            if(checkWin(board, turn)) { isGameOver = true; render(); triggerWin(); return; }
+            if(history[turn].length > 3) board[history[turn].shift()] = "";
+            render(); canMove = false; switchTurn();
         }
 
-        function switchTurn() { turn = turn === "X" ? "O" : "X"; nextTurn(); }
+        function triggerWin() {
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            const title = document.getElementById('winTitle');
+            title.textContent = `ניצחון ל-${turn}!`;
+            title.className = `text-6xl font-black mb-6 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
+            document.getElementById('winnerIcon').className = `text-9xl mb-10 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            setTimeout(() => showModal('winModal'), 600);
+        }
+
+        function switchTurn() { turn = turn === "X" ? "O" : "X"; render(); startTurn(); }
 
         function render() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach((c, i) => {
-                const val = board[i];
-                c.textContent = val === "X" ? "✕" : (val === "O" ? "◯" : "");
-                c.className = `cell ${val === "X" ? "x-sign" : "o-sign"}`;
-                if(val && history[val].length === 3 && history[val][0] === i) c.classList.add('ghost');
+            document.querySelectorAll('.cell').forEach((c, i) => {
+                const v = board[i]; c.textContent = v === "X" ? "✕" : (v === "O" ? "◯" : "");
+                c.className = "cell " + (v === "X" ? "x-lightsaber" : (v === "O" ? "o-lightsaber" : ""));
+                if(v && !isGameOver && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
             });
         }
 
-        function checkWin(p) {
+        function checkWin(b, p) {
             const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return w.some(pattern => pattern.every(idx => board[idx] === p));
+            return w.some(pats => pats.every(idx => b[idx] === p));
         }
 
-        function aiMove() {
-            const empty = board.map((v,i) => v===""?i:null).filter(v=>v!==null);
-            if(empty.length === 0) return;
-            const move = empty[Math.floor(Math.random()*empty.length)];
-            canMove = true; makeMove(move);
+        function aiAction() {
+            let m;
+            if(difficulty === 'easy') {
+                const av = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+                m = av[Math.floor(Math.random()*av.length)];
+            } else {
+                let bestS = -Infinity;
+                for(let i=0; i<9; i++) {
+                    if(board[i] === "") {
+                        board[i] = "O"; let s = minimax(board, 0, false); board[i] = "";
+                        if(s > bestS) { bestS = s; m = i; }
+                    }
+                }
+            }
+            if(m !== undefined) {
+                canMove = true; // מחשב לא צריך לענות על שאלה
+                makeMove(m);
+            }
+        }
+
+        function minimax(b, d, isMax) {
+            if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 4) return 0;
+            let best = isMax ? -Infinity : Infinity;
+            for(let i=0; i<9; i++) {
+                if(b[i] === "") {
+                    b[i] = isMax ? "O" : "X";
+                    let s = minimax(b, d+1, !isMax);
+                    b[i] = ""; best = isMax ? Math.max(best, s) : Math.min(best, s);
+                }
+            }
+            return best;
         }
     </script>
 </body>
 </html>
+
