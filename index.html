@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Strategic Edition</title>
+    <title>Super Tic Tac Toe - Centered Board</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        /* מרכז את הלוח כולל המספור */
+        /* לוח ממורכז עם מספור קטן */
         .grid-container { 
             display: grid; 
-            grid-template-columns: 40px 320px; 
-            grid-template-rows: 40px 320px; 
+            grid-template-columns: 20px 320px; 
+            grid-template-rows: 20px 320px; 
             gap: 10px; 
             margin: 0 auto;
-            position: relative;
-            left: -20px; /* קיזוז עבור עמודת האותיות כדי שמרכז ה-320px יהיה במרכז המסך */
+            justify-content: center; /* מבטיח מרכוז אופקי מלא */
         }
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
@@ -34,22 +33,27 @@
         .text-x-clean { color: #00f2ff; }
         .text-o-clean { color: #bc13fe; }
 
-        .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 12px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
+        /* כפתורי תפריט */
+        .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 20px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
         .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
         
-        /* כפתור "לשאלה הבאה" */
-        #nextQuestionBtn {
-            position: absolute; bottom: 80px; z-index: 50;
-            border-color: #facc15; color: #facc15;
-            box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
-            background: rgba(250, 204, 21, 0.1);
-            animation: pulse-button 2s infinite;
+        .back-btn {
+            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: bold; cursor: pointer; z-index: 100;
         }
-        @keyframes pulse-button { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+
+        #nextQuestionBtn {
+            margin-top: 40px;
+            border-color: #facc15; color: #facc15;
+            background: rgba(250, 204, 21, 0.1);
+        }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .axis-label { color: #555; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+        /* מספור קטן ועדין */
+        .axis-label { color: #444; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+        
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -66,7 +70,10 @@
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div id="statusHeader" class="mb-6 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
+        <div class="back-btn" onclick="location.reload()">➔</div>
+        
+        <div id="statusHeader" class="mb-4 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
+        
         <div class="grid-container">
             <div></div>
             <div class="grid grid-cols-3 w-full"><div class="axis-label">1</div><div class="axis-label">2</div><div class="axis-label">3</div></div>
@@ -75,8 +82,6 @@
         </div>
         
         <button id="nextQuestionBtn" onclick="showQuiz()" class="btn-main hidden">לחץ לשאלה הבאה</button>
-        
-        <button onclick="location.reload()" class="mt-20 text-zinc-600 underline font-bold">חזרה לתפריט</button>
     </div>
 
     <div id="vocabModal" class="modal">
@@ -151,7 +156,6 @@
             } else {
                 let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
                 document.getElementById('statusHeader').innerHTML = `תור: <span id="turnInfo" class="${colorClass}">${turn}</span>`;
-                // במקום להציג שאלה מיד, נציג את הכפתור
                 document.getElementById('nextQuestionBtn').classList.remove('hidden');
             }
         }
