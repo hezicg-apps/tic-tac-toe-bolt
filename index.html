@@ -3,21 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - V3.2 Deluxe</title>
+    <title>Super Tic Tac Toe - Gamer Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
-        .grid-container { display: grid; grid-template-columns: 40px 300px; grid-template-rows: 40px 300px; gap: 10px; margin: 0 auto; }
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 300px; height: 300px; position: relative; }
+        
+        /* עיצוב רשת # */
+        .grid-container { display: grid; grid-template-columns: 40px 320px; grid-template-rows: 40px 320px; gap: 10px; margin: 0 auto; }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; }
-        .board::before { width: 4px; height: 100%; left: 33%; box-shadow: 100px 0 0 #fff; }
-        .board::after { height: 4px; width: 100%; top: 33%; box-shadow: 0 100px 0 #fff; }
-        .cell { display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: bold; width: 100px; height: 100px; cursor: pointer; z-index: 10; }
-        .x-neon { color: #00f2ff; text-shadow: 0 0 15px #00f2ff; }
-        .o-neon { color: #bc13fe; text-shadow: 0 0 15px #bc13fe; }
-        .ghost { opacity: 0.3; }
+        .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff; }
+        .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff; }
+
+        /* סימנים משופרים עם קו מתאר וזוהר */
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 5.5rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
+        .x-neon { 
+            color: #00f2ff; 
+            text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
+            -webkit-text-stroke: 2px white;
+        }
+        .o-neon { 
+            color: #bc13fe; 
+            text-shadow: 0 0 10px #bc13fe, 0 0 20px #bc13fe;
+            -webkit-text-stroke: 2px white;
+        }
+        .ghost { opacity: 0.25; filter: blur(1px); }
+
+        /* כפתורים */
+        .btn-main { width: 300px; padding: 18px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; transition: 0.2s; border: 2px solid transparent; text-align: center; }
+        .btn-yellow { background: #facc15; color: #000; }
+        .btn-outline-yellow { border-color: #facc15; color: #facc15; background: transparent; }
+        .btn-main:active { transform: scale(0.95); }
+
+        /* סימן שאלה פועם */
         .help-btn {
             position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%;
             border: 2px solid #fff; color: #00f2ff; display: flex; align-items: center; justify-content: center;
@@ -25,35 +45,66 @@
             animation: pulse-glow 2s infinite; cursor: pointer;
         }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px #00f2ff; transform: scale(1); } 50% { box-shadow: 0 0 20px #00f2ff; transform: scale(1.1); } }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .axis-label { color: #666; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .axis-label { color: #444; font-weight: 900; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
 
     <div id="lobby" class="modal" style="display: flex;">
         <div class="help-btn" onclick="showModal('helpModal')">?</div>
-        <h1 class="text-[#00f2ff] text-6xl font-black italic mb-2 tracking-tighter">SUPER</h1>
-        <h1 class="text-[#bc13fe] text-4xl font-black italic mb-10 tracking-tighter">TIC TAC TOE</h1>
-        <button onclick="showModal('vocabModal')" class="w-72 py-4 mb-4 rounded-2xl border-2 border-[#facc15] text-[#facc15] font-bold">הכנסת מילים</button>
-        <button onclick="startGame('pvp')" class="w-72 py-4 mb-4 rounded-2xl bg-white text-black font-bold">2 שחקנים (בכיתה)</button>
-        <div class="flex gap-2">
-            <button onclick="startGame('pvc', 'easy')" class="w-35 px-6 py-4 rounded-2xl bg-zinc-800 text-white font-bold">מחשב קל</button>
-            <button onclick="startGame('pvc', 'hard')" class="w-35 px-6 py-4 rounded-2xl bg-[#00f2ff] text-black font-bold">מחשב קשה</button>
-        </div>
+        <h1 class="text-[#00f2ff] text-7xl font-black italic mb-2 tracking-tighter">SUPER</h1>
+        <h1 class="text-[#bc13fe] text-4xl font-black italic mb-12 tracking-tighter">TIC TAC TOE</h1>
+        
+        <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow">הכנסת מילים</button>
+        <button onclick="startGame('pvp')" class="btn-main btn-yellow">2 שחקנים (בכיתה)</button>
+        <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-yellow">שחקן VS מחשב (קל)</button>
+        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-yellow">שחקן VS מחשב (מאתגר)</button>
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div id="statusHeader" class="mb-8 text-2xl font-bold italic">תור: <span id="turnInfo"></span></div>
+        <div id="statusHeader" class="mb-6 text-3xl font-black italic">
+            תור: <span id="turnInfo"></span>
+        </div>
+        
         <div class="grid-container">
             <div></div>
             <div class="grid grid-cols-3 w-full"><div class="axis-label">1</div><div class="axis-label">2</div><div class="axis-label">3</div></div>
-            <div class="flex flex-col h-full justify-around py-4"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
+            <div class="flex flex-col h-full justify-around"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
             <div class="board" id="mainBoard"></div>
         </div>
-        <button onclick="location.reload()" class="mt-12 text-zinc-600 underline">חזרה לתפריט</button>
+        <button onclick="location.reload()" class="mt-12 text-zinc-600 underline font-bold">חזרה לתפריט</button>
+    </div>
+
+    <div id="vocabModal" class="modal">
+        <h2 class="text-[#facc15] text-3xl font-black mb-6 italic">הכנסת מילים</h2>
+        <div class="bg-zinc-900/50 p-4 rounded-[30px] border-2 border-zinc-700 w-80">
+            <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-80 bg-black/80 text-white p-6 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15] text-lg"></textarea>
+            <button onclick="saveVocab()" class="w-full py-4 bg-[#facc15] text-black font-extrabold rounded-xl text-xl">אישור</button>
+        </div>
+    </div>
+
+    <div id="winModal" class="modal">
+        <div class="text-center">
+            <h2 id="winTitle" class="text-7xl font-black italic mb-4">ניצחון!</h2>
+            <div id="winnerIcon" class="text-9xl mb-12"></div>
+            <button onclick="location.reload()" class="btn-main btn-yellow text-2xl py-6">משחק חדש</button>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal px-6 text-right">
+        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#00f2ff] max-w-sm">
+            <h2 class="text-[#00f2ff] text-2xl font-bold text-center mb-6">חוקי המשחק</h2>
+            <div class="space-y-4 text-zinc-300 font-bold" dir="rtl">
+                <p>💡 עונים נכון כדי לסמן בלוח.</p>
+                <p>♻️ רק 3 סימנים לכל שחקן.</p>
+                <p>⚠️ הסימן הרביעי מוחק את הראשון!</p>
+            </div>
+            <button onclick="hideModal('helpModal')" class="mt-8 bg-white text-black font-bold py-4 rounded-2xl w-full">הבנתי</button>
+        </div>
     </div>
 
     <div id="quizModal" class="modal">
@@ -61,29 +112,12 @@
         <div id="qOptions" class="flex flex-col gap-4 w-72"></div>
     </div>
 
-    <div id="vocabModal" class="modal">
-        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#facc15] w-80">
-            <h2 class="text-[#facc15] text-xl font-bold text-center mb-4">הכנסת מילים</h2>
-            <textarea id="vIn" placeholder="dog - כלב" class="w-full h-48 bg-black text-white p-4 rounded-2xl border border-zinc-800 text-right mb-4 outline-none"></textarea>
-            <button onclick="saveVocab()" class="w-full py-4 bg-[#facc15] text-black font-bold rounded-2xl">שמור</button>
-        </div>
-    </div>
-
-    <div id="helpModal" class="modal px-6 text-right">
-        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#00f2ff] max-w-sm">
-            <h2 class="text-[#00f2ff] text-2xl font-bold text-center mb-6">חוקי המשחק</h2>
-            <p dir="rtl" class="text-zinc-300 space-y-4">לאחר 3 תורים, הסימן הראשון שלכם ייעלם. שימו לב לסימנים השקופים!</p>
-            <button onclick="hideModal('helpModal')" class="mt-8 bg-white text-black font-bold py-4 rounded-2xl w-full">הבנתי</button>
-        </div>
-    </div>
-
     <script>
         let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(freq, type, duration) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
@@ -100,7 +134,9 @@
                 const p = l.split('-');
                 return p.length === 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            if(vocab.length < 3) alert("הזן 3 מילים לפחות"); else hideModal('vocabModal');
+            if(vocab.length < 3) {
+                alert("חובה להכניס לפחות 3 מילים כדי להתחיל!");
+            } else hideModal('vocabModal');
         }
 
         function startGame(mode, diff = 'hard') {
@@ -138,18 +174,18 @@
             }
             opts.sort(() => Math.random() - 0.5);
             document.getElementById('qText').textContent = item.en;
-            document.getElementById('qText').className = `text-6xl font-black mb-16 italic ${turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('qText').className = `text-7xl font-black mb-16 italic ${turn==='X'?'x-neon':'o-neon'}`;
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'w-full py-5 rounded-2xl border-2 border-zinc-800 text-white text-xl font-bold';
+                btn.className = 'w-full py-5 rounded-2xl border-2 border-zinc-800 text-white text-2xl font-black transition-all';
                 btn.textContent = o;
                 btn.onclick = () => {
                     if(o === item.he) {
-                        playSound(880, 'sine', 0.2); btn.style.borderColor = '#22c55e';
+                        playSound(880, 'sine', 0.2); btn.style.borderColor = '#22c55e'; btn.style.color = '#22c55e';
                         setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
                     } else {
-                        playSound(220, 'square', 0.3); btn.style.borderColor = '#ef4444';
+                        playSound(150, 'square', 0.3); btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444';
                         document.getElementById('quizModal').classList.add('shake');
                         setTimeout(() => { hideModal('quizModal'); document.getElementById('quizModal').classList.remove('shake'); switchTurn(); }, 800);
                     }
@@ -164,17 +200,25 @@
             if(history[turn].length > 3) board[history[turn].shift()] = "";
             render();
             if(checkWin(board, turn)) {
-                playSound(523, 'sine', 0.2); setTimeout(()=>playSound(659, 'sine', 0.2), 150); setTimeout(()=>playSound(783, 'sine', 0.4), 300);
-                const end = Date.now() + 3000;
-                (function frame() {
-                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-                    if (Date.now() < end) requestAnimationFrame(frame);
-                }());
-                setTimeout(() => { alert(`ניצחון ל-${turn}!`); location.reload(); }, 1500);
+                triggerWin();
                 return;
             }
             canMove = false; switchTurn();
+        }
+
+        function triggerWin() {
+            const end = Date.now() + 3000;
+            (function frame() {
+                confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#00f2ff', '#bc13fe', '#facc15'] });
+                confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00f2ff', '#bc13fe', '#facc15'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+            
+            document.getElementById('winTitle').textContent = `ניצחון ל-${turn}!`;
+            document.getElementById('winTitle').className = `text-7xl font-black italic mb-4 ${turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
+            document.getElementById('winnerIcon').className = `text-9xl mb-12 ${turn==='X'?'x-neon':'o-neon'}`;
+            setTimeout(() => showModal('winModal'), 500);
         }
 
         function switchTurn() { turn = turn === "X" ? "O" : "X"; render(); startTurn(); }
@@ -210,7 +254,7 @@
         }
 
         function minimax(b, d, isMax) {
-            if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 3) return 0;
+            if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 4) return 0;
             let best = isMax ? -Infinity : Infinity;
             for(let i=0; i<9; i++) {
                 if(b[i] === "") {
