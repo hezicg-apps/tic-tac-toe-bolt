@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.4</title>
+    <title>Tic Tac Toe Bolt v. 2.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -13,42 +13,49 @@
         #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .logo-container { margin-top: 60px; margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
 
-        /* מבנה הלוח והמרכוז */
-        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
-        .grid-container { display: grid; grid-template-columns: 30px 320px; grid-template-rows: 30px 320px; gap: 5px; margin-bottom: 20px; }
+        /* מרכוז נקי ללא הפרעות */
+        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
         
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
+        .board { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            width: 340px; 
+            height: 340px; 
+            position: relative; 
+            margin-bottom: 40px;
+        }
+        
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
-        .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
-        .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff, 0 0 10px #fff, 0 106px 10px #fff; }
+        /* קווי אורך */
+        .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 113px 0 0 #fff, 0 0 10px #fff, 113px 0 10px #fff; }
+        /* קווי רוחב */
+        .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 113px 0 #fff, 0 0 10px #fff, 0 113px 10px #fff; }
         
-        .cell { display: flex; align-items: center; justify-content: center; font-size: 6rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 6.5rem; font-weight: 900; width: 113px; height: 113px; cursor: pointer; z-index: 10; }
         .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
         
         .btn-main { width: 300px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 15px; border: 2px solid; cursor: pointer; transition: 0.2s; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         
-        /* כפתור השאלה הדינמי והממורכז */
         .glow-q-btn {
-            width: 95px; height: 95px; border-radius: 50%;
+            width: 100px; height: 100px; border-radius: 50%;
             background: rgba(255, 255, 255, 0.05);
-            border: 4px solid #facc15;
-            color: #facc15; font-size: 4.5rem; font-weight: 900;
+            border: 5px solid #facc15;
+            color: #facc15; font-size: 5rem; font-weight: 900;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 50;
-            transition: all 0.4s ease;
-            animation: question-pulse 1.8s infinite;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: question-pulse 2s infinite;
         }
 
-        /* מצבי צבע לפי תור */
-        .q-turn-x { border-color: #00f2ff; color: #00f2ff; box-shadow: 0 0 20px #00f2ff; }
-        .q-turn-o { border-color: #bc13fe; color: #bc13fe; box-shadow: 0 0 20px #bc13fe; }
+        .q-turn-x { border-color: #00f2ff; color: #00f2ff; box-shadow: 0 0 25px #00f2ff; }
+        .q-turn-o { border-color: #bc13fe; color: #bc13fe; box-shadow: 0 0 25px #bc13fe; }
         
         @keyframes question-pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.8; }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px currentColor; }
+            50% { transform: scale(1.1); box-shadow: 0 0 35px currentColor; }
         }
 
         .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px #facc15; z-index: 100; }
@@ -63,7 +70,7 @@
 
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
-        <div class="absolute top-5 right-5 text-zinc-700 font-mono">v. 2.4</div>
+        <div class="absolute top-5 right-5 text-zinc-800 font-mono text-xs">v. 2.5</div>
         <div class="logo-container">
             <h1 class="text-[#00f2ff] text-5xl font-black italic mb-1 leading-none">TIC TAC TOE</h1>
             <h1 class="text-[#facc15] text-8xl font-black italic mt-0" style="text-shadow: 0 0 30px #facc15;">BOLT ⚡</h1>
@@ -75,24 +82,19 @@
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <button onclick="location.reload()" class="absolute top-5 right-5 text-4xl">➔</button>
-        <div id="statusHeader" class="mb-8 text-4xl font-black italic"></div>
+        <button onclick="location.reload()" class="absolute top-5 right-5 text-4xl text-zinc-500 hover:text-white transition-colors">➔</button>
+        
+        <div id="statusHeader" class="mb-10 text-5xl font-black italic"></div>
         
         <div class="game-wrapper">
-            <div class="grid-container">
-                <div></div>
-                <div class="grid grid-cols-3 w-full"><div class="text-zinc-800 text-center text-xl">1</div><div class="text-zinc-800 text-center text-xl">2</div><div class="text-zinc-800 text-center text-xl">3</div></div>
-                <div class="flex flex-col justify-around text-zinc-800 pr-2 text-xl"><div>A</div><div>B</div><div>C</div></div>
-                <div id="mainBoard" class="board"></div>
-            </div>
-            
+            <div id="mainBoard" class="board"></div>
             <div id="nextQuestionBtn" onclick="showQuiz()" class="glow-q-btn hidden">?</div>
         </div>
     </div>
 
     <div id="quizModal" class="modal">
-        <div id="qText" class="text-6xl font-black mb-12 italic text-center" style="direction: ltr;"></div>
-        <div id="qOptions" class="flex flex-col gap-4 w-72"></div>
+        <div id="qText" class="text-7xl font-black mb-16 italic text-center" style="direction: ltr;"></div>
+        <div id="qOptions" class="flex flex-col gap-5 w-80"></div>
     </div>
 
     <div id="helpModal" class="modal">
@@ -100,8 +102,8 @@
             <h2 class="text-[#facc15] text-3xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-lg space-y-4 mb-8">
                 <li>⚡ <b>החוק המרכזי:</b> לכל שחקן יש רק 3 סימנים. בסימן ה-4, הראשון ששמתם ייעלם!</li>
-                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה. צבעו משתנה לפי התור!</li>
-                <li>⚡ <b>עניתם נכון?</b> לחצו על הלוח כדי לסמן.</li>
+                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה. צבעו משתנה לפי התור.</li>
+                <li>⚡ <b>ניצחון:</b> 3 ברצף (אופקי, אנכי או אלכסוני).</li>
             </ul>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
         </div>
@@ -177,13 +179,9 @@
             if(isGameOver) return;
             const btn = document.getElementById('nextQuestionBtn');
             const cls = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
-            
             document.getElementById('statusHeader').innerHTML = `<span class="${cls}">תור ${turn}</span>`;
-            
-            // עדכון צבע כפתור השאלה
             btn.className = `glow-q-btn ${turn === 'X' ? 'q-turn-x' : 'q-turn-o'}`;
             btn.classList.remove('hidden');
-            
             if(gameMode === 'pvc' && turn === 'O') setTimeout(aiAction, 800);
         }
 
@@ -195,21 +193,29 @@
                 if(!opts.includes(r)) opts.push(r);
             }
             opts.sort(() => Math.random() - 0.5);
-            
             const qT = document.getElementById('qText');
             qT.textContent = item.en;
-            qT.className = `text-6xl font-black mb-12 italic text-center ${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}`;
-            
+            qT.className = `text-7xl font-black mb-16 italic text-center ${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}`;
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'w-full py-4 rounded-xl border-2 border-zinc-800 text-xl font-bold';
+                btn.className = 'w-full py-5 rounded-2xl border-2 border-zinc-800 text-2xl font-bold transition-all active:scale-95';
                 btn.textContent = o;
                 btn.onclick = () => handleAnswer(o === item.he, btn, item);
                 container.appendChild(btn);
             });
             showModal('quizModal');
             if(gameMode === 'speed') startTimer();
+        }
+
+        function startTimer() {
+            let time = 100;
+            const bar = document.getElementById('speedTimer');
+            clearInterval(speedInterval);
+            speedInterval = setInterval(() => {
+                time -= 2; bar.style.width = time + "%";
+                if(time <= 0) { clearInterval(speedInterval); handleAnswer(false, null, {he:'', en: 'זמן עבר'}); }
+            }, 100);
         }
 
         function handleAnswer(isCorrect, btn, item) {
@@ -238,14 +244,14 @@
         }
 
         function triggerWin() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
             const title = document.getElementById('winTitle');
             title.textContent = `${turn} לנצח!`;
-            title.className = `text-6xl font-black mb-4 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            title.className = `text-7xl font-black mb-4 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
             document.getElementById('winnerIcon').className = `text-9xl mb-8 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             const hard = Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
-            document.getElementById('hardWords').textContent = hard.length ? hard.join(', ') : 'אין טעויות! מצוין!';
+            document.getElementById('hardWords').textContent = hard.length ? hard.join(', ') : 'אין טעויות! פנטסטי!';
             setTimeout(() => showModal('winModal'), 600);
         }
 
