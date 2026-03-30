@@ -3,47 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Gamer Edition</title>
+    <title>Super Tic Tac Toe - Lightsaber Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
+        /* עיצוב רשת # */
         .grid-container { display: grid; grid-template-columns: 40px 320px; grid-template-rows: 40px 320px; gap: 10px; margin: 0 auto; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
-        .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; }
-        .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff; }
-        .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff; }
+        .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
+        .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
+        .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff, 0 0 10px #fff, 0 106px 10px #fff; }
 
-        .cell { display: flex; align-items: center; justify-content: center; font-size: 5.5rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
-        .x-neon { 
-            color: #00f2ff; 
-            text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff;
-            -webkit-text-stroke: 2px white;
+        /* סימנים בסגנון חרב אור */
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 6rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
+        
+        .x-lightsaber { 
+            color: #fff; 
+            text-shadow: 
+                0 0 7px #fff,
+                0 0 10px #fff,
+                0 0 21px #00f2ff,
+                0 0 42px #00f2ff,
+                0 0 82px #00f2ff,
+                0 0 92px #00f2ff;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.5);
         }
-        .o-neon { 
-            color: #bc13fe; 
-            text-shadow: 0 0 10px #bc13fe, 0 0 20px #bc13fe;
-            -webkit-text-stroke: 2px white;
+        
+        .o-lightsaber { 
+            color: #fff; 
+            text-shadow: 
+                0 0 7px #fff,
+                0 0 10px #fff,
+                0 0 21px #bc13fe,
+                0 0 42px #bc13fe,
+                0 0 82px #bc13fe,
+                0 0 92px #bc13fe;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.5);
         }
-        .ghost { opacity: 0.25; filter: blur(1px); }
 
+        .ghost { opacity: 0.15; filter: blur(2px); }
+
+        /* כפתורים */
         .btn-main { width: 300px; padding: 18px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; transition: 0.2s; border: 2px solid transparent; text-align: center; cursor: pointer; }
-        .btn-yellow { background: #facc15; color: #000; }
+        .btn-yellow { background: #facc15; color: #000; box-shadow: 0 0 15px rgba(250, 204, 21, 0.5); }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; background: transparent; }
+        .btn-outline-cyan { border-color: #00f2ff; color: #00f2ff; background: transparent; box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+        .btn-outline-purple { border-color: #bc13fe; color: #bc13fe; background: transparent; box-shadow: 0 0 10px rgba(188, 19, 254, 0.3); }
         .btn-main:active { transform: scale(0.95); }
 
+        /* סימן שאלה פועם */
         .help-btn {
             position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%;
             border: 2px solid #fff; color: #00f2ff; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: bold; z-index: 100; box-shadow: 0 0 15px #00f2ff;
+            font-size: 28px; font-weight: bold; z-index: 100; box-shadow: 0 0 15px #00f2ff, inset 0 0 5px #00f2ff;
             animation: pulse-glow 2s infinite; cursor: pointer;
         }
-        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px #00f2ff; transform: scale(1); } 50% { box-shadow: 0 0 20px #00f2ff; transform: scale(1.1); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px #00f2ff, inset 0 0 2px #00f2ff; transform: scale(1); } 50% { box-shadow: 0 0 20px #00f2ff, inset 0 0 10px #00f2ff; transform: scale(1.1); } }
 
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .axis-label { color: #444; font-weight: 900; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .axis-label { color: #555; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 5px rgba(255,255,255,0.1); }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -52,28 +73,28 @@
 
     <div id="lobby" class="modal" style="display: flex;">
         <div class="help-btn" onclick="showModal('helpModal')">?</div>
-        <h1 class="text-[#00f2ff] text-7xl font-black italic mb-2 tracking-tighter">SUPER</h1>
-        <h1 class="text-[#bc13fe] text-4xl font-black italic mb-12 tracking-tighter">TIC TAC TOE</h1>
+        <h1 class="text-[#00f2ff] text-8xl font-black italic mb-2 tracking-tighter" style="text-shadow: 0 0 20px #00f2ff;">SUPER</h1>
+        <h1 class="text-[#bc13fe] text-5xl font-black italic mb-14 tracking-tighter" style="text-shadow: 0 0 15px #bc13fe;">TIC TAC TOE</h1>
         
         <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow">הכנסת מילים</button>
-        <button onclick="startGame('pvp')" class="btn-main btn-yellow text-xl">2 שחקנים </button>
-        <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-yellow">שחקן VS מחשב (קל)</button>
-        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-yellow">שחקן VS מחשב (מאתגר)</button>
+        <button onclick="startGame('pvp')" class="btn-main btn-yellow text-xl">2 שחקנים</button>
+        <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-cyan">שחקן VS מחשב (קל)</button>
+        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-purple">שחקן VS מחשב (מאתגר)</button>
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div id="statusHeader" class="mb-6 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
+        <div id="statusHeader" class="mb-6 text-3xl font-black italic">تור: <span id="turnInfo"></span></div>
         <div class="grid-container">
             <div></div>
             <div class="grid grid-cols-3 w-full"><div class="axis-label">1</div><div class="axis-label">2</div><div class="axis-label">3</div></div>
             <div class="flex flex-col h-full justify-around"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
             <div id="mainBoard" class="board"></div>
         </div>
-        <button onclick="location.reload()" class="mt-12 text-zinc-600 underline font-bold">חזרה לתפריט</button>
+        <button onclick="location.reload()" class="mt-12 text-zinc-600 underline font-bold hover:text-zinc-300">חזרה לתפריט</button>
     </div>
 
     <div id="vocabModal" class="modal">
-        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">הכנסת מילים</h2>
+        <h2 class="text-[#facc15] text-4xl font-black mb-6 italic" style="text-shadow: 0 0 10px #facc15;">הכנסת מילים</h2>
         <div class="bg-zinc-900/50 p-4 rounded-[30px] border-2 border-zinc-700 w-80">
             <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-80 bg-black/80 text-white p-6 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15] text-lg"></textarea>
             <button onclick="saveVocab()" class="w-full py-4 bg-[#facc15] text-black font-extrabold rounded-xl text-xl">אישור</button>
@@ -82,26 +103,26 @@
 
     <div id="winModal" class="modal">
         <div class="text-center">
-            <h2 id="winTitle" class="text-7xl font-black italic mb-4">ניצחון!</h2>
-            <div id="winnerIcon" class="text-9xl mb-12"></div>
+            <h2 id="winTitle" class="text-8xl font-black italic mb-6">ניצחון!</h2>
+            <div id="winnerIcon" class="text-[12rem] mb-14"></div>
             <button onclick="location.reload()" class="btn-main btn-yellow text-2xl py-6">משחק חדש</button>
         </div>
     </div>
 
     <div id="helpModal" class="modal px-6 text-right">
-        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#00f2ff] max-w-sm">
-            <h2 class="text-[#00f2ff] text-2xl font-bold text-center mb-6">חוקי המשחק</h2>
-            <div class="space-y-4 text-zinc-300 font-bold" dir="rtl">
+        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#00f2ff] max-w-sm" style="box-shadow: 0 0 20px rgba(0,242,255,0.2);">
+            <h2 class="text-[#00f2ff] text-3xl font-bold text-center mb-8" style="text-shadow: 0 0 10px #00f2ff;">חוקי המשחק</h2>
+            <div class="space-y-5 text-zinc-100 font-bold text-lg" dir="rtl">
                 <p>💡 עונים נכון כדי לסמן בלוח.</p>
                 <p>♻️ רק 3 סימנים לכל שחקן.</p>
                 <p>⚠️ הסימן הרביעי מוחק את הראשון!</p>
             </div>
-            <button onclick="hideModal('helpModal')" class="mt-8 bg-white text-black font-bold py-4 rounded-2xl w-full">הבנתי</button>
+            <button onclick="hideModal('helpModal')" class="mt-10 bg-white text-black font-bold py-4 rounded-2xl w-full text-lg">הבנתי</button>
         </div>
     </div>
 
     <div id="quizModal" class="modal">
-        <div id="qText" class="text-6xl font-black mb-16 italic text-center px-6"></div>
+        <div id="qText" class="text-7xl font-black mb-16 italic text-center px-6"></div>
         <div id="qOptions" class="flex flex-col gap-4 w-72"></div>
     </div>
 
@@ -123,17 +144,12 @@
 
         function saveVocab() {
             const raw = document.getElementById('vIn').value;
-            // התיקון כאן: תומך במגוון סוגי מפרידים (מקפים שונים, נקודתיים)
             vocab = raw.split('\n').map(l => {
                 const p = l.split(/[–\-\—:]/); 
                 return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            
-            if(vocab.length < 3) {
-                alert("נא להכניס לפחות 3 מילים בפורמט: מילה - תרגום");
-            } else {
-                hideModal('vocabModal');
-            }
+            if(vocab.length < 3) { alert("נא להכניס לפחות 3 מילים בפורמט: מילה - תרגום"); }
+            else hideModal('vocabModal');
         }
 
         function startGame(mode, diff = 'hard') {
@@ -158,7 +174,8 @@
                 document.getElementById('statusHeader').textContent = "המחשב חושב...";
                 setTimeout(aiAction, 1000);
             } else {
-                document.getElementById('statusHeader').innerHTML = `תור: <span id="turnInfo" class="${turn==='X'?'x-neon':'o-neon'}">${turn}</span>`;
+                let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
+                document.getElementById('statusHeader').innerHTML = `תור: <span id="turnInfo" class="${colorClass}">${turn}</span>`;
                 showQuiz();
             }
         }
@@ -172,7 +189,7 @@
             }
             opts.sort(() => Math.random() - 0.5);
             document.getElementById('qText').textContent = item.en;
-            document.getElementById('qText').className = `text-7xl font-black mb-16 italic ${turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('qText').className = `text-7xl font-black mb-16 italic ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
@@ -212,10 +229,11 @@
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
             
+            let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
             document.getElementById('winTitle').textContent = `ניצחון ל-${turn}!`;
-            document.getElementById('winTitle').className = `text-7xl font-black italic mb-4 ${turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('winTitle').className = `text-8xl font-black italic mb-6 ${colorClass}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
-            document.getElementById('winnerIcon').className = `text-9xl mb-12 ${turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('winnerIcon').className = `text-[12rem] mb-14 ${colorClass}`;
             setTimeout(() => showModal('winModal'), 500);
         }
 
@@ -224,7 +242,7 @@
         function render() {
             document.querySelectorAll('.cell').forEach((c, i) => {
                 const v = board[i]; c.textContent = v === "X" ? "✕" : (v === "O" ? "◯" : "");
-                c.className = "cell " + (v === "X" ? "x-neon" : (v === "O" ? "o-neon" : ""));
+                c.className = "cell " + (v === "X" ? "x-lightsaber" : (v === "O" ? "o-lightsaber" : ""));
                 if(v && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
             });
         }
@@ -253,16 +271,4 @@
 
         function minimax(b, d, isMax) {
             if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 4) return 0;
-            let best = isMax ? -Infinity : Infinity;
-            for(let i=0; i<9; i++) {
-                if(b[i] === "") {
-                    b[i] = isMax ? "O" : "X";
-                    let s = minimax(b, d+1, !isMax);
-                    b[i] = ""; best = isMax ? Math.max(best, s) : Math.min(best, s);
-                }
-            }
-            return best;
-        }
-    </script>
-</body>
-</html>
+            let best = isMax ? -Infinity : Infinity
