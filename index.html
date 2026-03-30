@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Jedi Edition</title>
+    <title>Super Tic Tac Toe - Neon Outline Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -32,10 +32,10 @@
 
         .ghost { opacity: 0.15; filter: blur(2px); }
 
-        /* כפתורים בגובה אחיד */
+        /* כפתורים בגובה אחיד, כולם Outline */
         .btn-main { 
             width: 300px; 
-            height: 65px; /* גובה קבוע לכולם */
+            height: 65px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -43,19 +43,39 @@
             font-weight: 900; 
             margin-bottom: 12px; 
             transition: 0.2s; 
-            border: 2px solid transparent; 
+            border: 2px solid; 
             cursor: pointer; 
             text-align: center;
+            background: transparent;
         }
 
-        .btn-yellow { 
-            background: #facc15; 
-            color: #000; 
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); 
+        /* צבעי Outline ייחודיים */
+        .btn-outline-yellow { 
+            border-color: #facc15; 
+            color: #facc15; 
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+        }
+        
+        /* 2 שחקנים - שילוב של תכלת וסגול */
+        .btn-outline-multi {
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff;
+            text-shadow: 0 0 5px #fff;
         }
 
-        .btn-outline-yellow { border-color: #facc15; color: #facc15; background: transparent; }
-        .btn-outline-cyan { border-color: #00f2ff; color: #00f2ff; background: transparent; }
+        .btn-outline-cyan { 
+            border-color: #00f2ff; 
+            color: #00f2ff; 
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
+        
+        /* מאתגר - סגול זוהר */
+        .btn-outline-purple {
+            border-color: #bc13fe; 
+            color: #bc13fe; 
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+        }
 
         .btn-main:active { transform: scale(0.95); }
 
@@ -81,8 +101,8 @@
         <h1 class="text-[#bc13fe] text-5xl font-black italic mb-14 tracking-tighter" style="text-shadow: 0 0 15px #bc13fe;">TIC TAC TOE</h1>
         
         <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow text-lg">הכנסת מילים</button>
-        <button onclick="startGame('pvp')" class="btn-main btn-yellow text-xl">2 שחקנים</button>
-        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-yellow text-xl">שחקן VS מחשב (מאתגר)</button>
+        <button onclick="startGame('pvp')" class="btn-main btn-outline-multi text-xl">2 שחקנים</button>
+        <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-purple text-xl">שחקן VS מחשב (מאתגר)</button>
         <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-cyan text-lg">שחקן VS מחשב (קל)</button>
     </div>
 
@@ -109,7 +129,7 @@
         <div class="text-center">
             <h2 id="winTitle" class="text-8xl font-black italic mb-6">ניצחון!</h2>
             <div id="winnerIcon" class="text-[12rem] mb-14 leading-none"></div>
-            <button onclick="location.reload()" class="btn-main btn-yellow text-2xl h-20 mx-auto">משחק חדש</button>
+            <button onclick="location.reload()" class="btn-main btn-outline-yellow text-2xl h-20 mx-auto" style="border-color: #facc15;">משחק חדש</button>
         </div>
     </div>
 
