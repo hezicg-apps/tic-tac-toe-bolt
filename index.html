@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.9</title>
+    <title>Tic Tac Toe Bolt v. 3.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -53,7 +53,7 @@
         .wrong-anim { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.2) !important; box-shadow: 0 0 20px #ef4444; }
         
         .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; }
-        .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
+        .timer-bar { position: fixed; top: 0; left: 0; height: 10px; background: #facc15; width: 0%; z-index: 3000; box-shadow: 0 0 15px #facc15; transition: width 0.1s linear; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -94,7 +94,7 @@
             <h2 class="text-[#facc15] text-2xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-lg space-y-4 mb-8">
                 <li>⚡ <b>רק 3 סימנים:</b> בסימן ה-4, הראשון נעלם!</li>
-                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל תור. צבעו משתנה לפי השחקן.</li>
+                <li>⚡ <b>Speed Run:</b> יש לכם 5 שניות לענות על שאלה!</li>
             </ul>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
         </div>
@@ -120,6 +120,7 @@
 
     <script>
         let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
+        let timeLeft = 100, speedInterval;
 
         window.onload = () => {
             const saved = localStorage.getItem('ttt_vocab');
@@ -185,15 +186,33 @@
                 container.appendChild(btn);
             });
             showModal('quizModal');
+            if(gameMode === 'speed') startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 100;
+            document.getElementById('speedTimer').style.width = "100%";
+            clearInterval(speedInterval);
+            speedInterval = setInterval(() => {
+                timeLeft -= 2;
+                document.getElementById('speedTimer').style.width = timeLeft + "%";
+                if(timeLeft <= 0) {
+                    clearInterval(speedInterval);
+                    handleAnswer(false, null, ""); // זמן נגמר נחשב טעות
+                }
+            }, 100);
         }
 
         function handleAnswer(isCorrect, clickedBtn, correctHe) {
+            clearInterval(speedInterval);
+            document.getElementById('speedTimer').style.width = "0%";
             const btns = document.querySelectorAll('.option-btn');
+            
             if(isCorrect) {
-                clickedBtn.classList.add('correct-anim');
+                if(clickedBtn) clickedBtn.classList.add('correct-anim');
                 setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
             } else {
-                clickedBtn.classList.add('wrong-anim');
+                if(clickedBtn) clickedBtn.classList.add('wrong-anim');
                 btns.forEach(b => { if(b.textContent === correctHe) b.classList.add('correct-anim'); });
                 document.getElementById('quizModal').classList.add('shake');
                 setTimeout(() => { 
@@ -215,7 +234,6 @@
         function triggerWin() {
             confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
             const title = document.getElementById('winTitle');
-            // תיקון ניסוח הניצחון לעברית תקינה
             title.textContent = `ניצחון ל-${turn}!`;
             title.className = `text-6xl font-black mb-6 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
