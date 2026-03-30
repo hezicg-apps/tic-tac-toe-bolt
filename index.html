@@ -10,14 +10,12 @@
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        /* עיצוב רשת # */
         .grid-container { display: grid; grid-template-columns: 40px 320px; grid-template-rows: 40px 320px; gap: 10px; margin: 0 auto; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; }
         .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff; }
         .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff; }
 
-        /* סימנים משופרים עם קו מתאר וזוהר */
         .cell { display: flex; align-items: center; justify-content: center; font-size: 5.5rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
         .x-neon { 
             color: #00f2ff; 
@@ -31,13 +29,11 @@
         }
         .ghost { opacity: 0.25; filter: blur(1px); }
 
-        /* כפתורים */
-        .btn-main { width: 300px; padding: 18px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; transition: 0.2s; border: 2px solid transparent; text-align: center; }
+        .btn-main { width: 300px; padding: 18px; border-radius: 20px; font-weight: bold; margin-bottom: 12px; transition: 0.2s; border: 2px solid transparent; text-align: center; cursor: pointer; }
         .btn-yellow { background: #facc15; color: #000; }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; background: transparent; }
         .btn-main:active { transform: scale(0.95); }
 
-        /* סימן שאלה פועם */
         .help-btn {
             position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%;
             border: 2px solid #fff; color: #00f2ff; display: flex; align-items: center; justify-content: center;
@@ -60,27 +56,24 @@
         <h1 class="text-[#bc13fe] text-4xl font-black italic mb-12 tracking-tighter">TIC TAC TOE</h1>
         
         <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow">הכנסת מילים</button>
-        <button onclick="startGame('pvp')" class="btn-main btn-yellow">2 שחקנים (בכיתה)</button>
+        <button onclick="startGame('pvp')" class="btn-main btn-yellow text-xl">2 שחקנים (בכיתה)</button>
         <button onclick="startGame('pvc', 'easy')" class="btn-main btn-outline-yellow">שחקן VS מחשב (קל)</button>
         <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-yellow">שחקן VS מחשב (מאתגר)</button>
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div id="statusHeader" class="mb-6 text-3xl font-black italic">
-            תור: <span id="turnInfo"></span>
-        </div>
-        
+        <div id="statusHeader" class="mb-6 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
         <div class="grid-container">
             <div></div>
             <div class="grid grid-cols-3 w-full"><div class="axis-label">1</div><div class="axis-label">2</div><div class="axis-label">3</div></div>
             <div class="flex flex-col h-full justify-around"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
-            <div class="board" id="mainBoard"></div>
+            <div id="mainBoard" class="board"></div>
         </div>
         <button onclick="location.reload()" class="mt-12 text-zinc-600 underline font-bold">חזרה לתפריט</button>
     </div>
 
     <div id="vocabModal" class="modal">
-        <h2 class="text-[#facc15] text-3xl font-black mb-6 italic">הכנסת מילים</h2>
+        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">הכנסת מילים</h2>
         <div class="bg-zinc-900/50 p-4 rounded-[30px] border-2 border-zinc-700 w-80">
             <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-80 bg-black/80 text-white p-6 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15] text-lg"></textarea>
             <button onclick="saveVocab()" class="w-full py-4 bg-[#facc15] text-black font-extrabold rounded-xl text-xl">אישור</button>
@@ -130,13 +123,17 @@
 
         function saveVocab() {
             const raw = document.getElementById('vIn').value;
+            // התיקון כאן: תומך במגוון סוגי מפרידים (מקפים שונים, נקודתיים)
             vocab = raw.split('\n').map(l => {
-                const p = l.split('-');
-                return p.length === 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
+                const p = l.split(/[–\-\—:]/); 
+                return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
+            
             if(vocab.length < 3) {
-                alert("חובה להכניס לפחות 3 מילים כדי להתחיל!");
-            } else hideModal('vocabModal');
+                alert("נא להכניס לפחות 3 מילים בפורמט: מילה - תרגום");
+            } else {
+                hideModal('vocabModal');
+            }
         }
 
         function startGame(mode, diff = 'hard') {
@@ -153,6 +150,7 @@
                 c.onclick = () => { if(canMove && board[i] === "") makeMove(i); };
                 b.appendChild(c);
             }
+            render();
         }
 
         function startTurn() {
