@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.2</title>
+    <title>Tic Tac Toe Bolt v. 2.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -11,6 +11,9 @@
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
         #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+
+        /* תיקון המרווח של הלוגו כדי שלא יתנגש בסימן השאלה */
+        .logo-container { margin-top: 60px; margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
 
         .grid-container { display: grid; grid-template-columns: 20px 320px; grid-template-rows: 20px 320px; gap: 10px; margin: 0 auto; justify-content: center; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
@@ -36,17 +39,17 @@
         .ltr-text { direction: ltr; }
         .btn-speed { direction: ltr; display: flex; flex-direction: row-reverse; gap: 10px; }
 
-        /* כפתור עזרה זוהר במסך פתיחה */
+        /* כפתור עזרה זוהר במסך פתיחה - הוסט מעט יותר לפינה */
         .help-btn {
-            position: absolute; top: 20px; left: 20px;
-            width: 50px; height: 50px; border-radius: 50%;
+            position: absolute; top: 15px; left: 15px;
+            width: 45px; height: 45px; border-radius: 50%;
             border: 2px solid #facc15; color: #facc15;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: bold; cursor: pointer;
+            font-size: 1.4rem; font-weight: bold; cursor: pointer;
             box-shadow: 0 0 10px #facc15; transition: 0.3s;
+            z-index: 100;
         }
 
-        /* כפתור השאלה בתוך המשחק */
         .glow-q-btn {
             width: 90px; height: 90px; border-radius: 50%;
             background: rgba(250, 204, 21, 0.1);
@@ -70,9 +73,9 @@
 
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
-        <div class="absolute top-5 right-5 text-zinc-600 font-mono">v. 2.2</div>
+        <div class="absolute top-5 right-5 text-zinc-600 font-mono">v. 2.3</div>
         
-        <div class="flex flex-col items-center mb-12">
+        <div class="logo-container">
             <h1 class="text-[#00f2ff] text-5xl font-black italic mb-1 leading-none">TIC TAC TOE</h1>
             <h1 class="text-[#facc15] text-8xl font-black italic mt-0" style="text-shadow: 0 0 30px #facc15;">BOLT ⚡</h1>
         </div>
