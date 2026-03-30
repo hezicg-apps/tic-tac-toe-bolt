@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe v. 1.9.2</title>
+    <title>Tic Tac Toe Bolt v. 2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -26,7 +26,6 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
         .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
         .ltr-text { direction: ltr; }
-        /* תיקון ספציפי לכפתור ספיד ראן */
         .btn-speed { direction: ltr; display: flex; flex-direction: row-reverse; gap: 10px; }
     </style>
 </head>
@@ -35,9 +34,11 @@
     <div id="speedTimer" class="timer-bar"></div>
 
     <div id="lobby" class="modal" style="display: flex;">
-        <div class="absolute top-5 text-zinc-600 font-mono">v. 1.9.2</div>
-        <h1 class="text-[#00f2ff] text-7xl font-black italic mb-2">SUPER</h1>
-        <h1 class="text-[#bc13fe] text-4xl font-black italic mb-10">TIC TAC TOE</h1>
+        <div class="absolute top-5 text-zinc-600 font-mono">v. 2.0</div>
+        <div class="flex flex-col items-center mb-10">
+            <h1 class="text-[#00f2ff] text-5xl font-black italic mb-0 leading-none">TIC TAC TOE</h1>
+            <h1 class="text-[#facc15] text-8xl font-black italic mt-0" style="text-shadow: 0 0 30px #facc15;">BOLT ⚡</h1>
+        </div>
         <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
         <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
         <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500 btn-speed"><span>Speed Run</span><span>⚡</span></button>
@@ -45,21 +46,21 @@
     </div>
 
     <div id="aiDifficultyModal" class="modal">
-        <h2 class="text-white text-3xl font-black mb-8 italic">בחר רמת קושי</h2>
+        <h2 class="text-white text-3xl font-black mb-8 italic text-center">בחר רמת קושי למחשב</h2>
         <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'easy')" class="btn-main border-[#00f2ff] text-[#00f2ff]">קל</button>
         <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
         <button onclick="hideModal('aiDifficultyModal')" class="text-zinc-500 mt-4 underline">ביטול</button>
     </div>
 
     <div id="vocabModal" class="modal">
-        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">רשמו/הדביקו מילים</h2>
+        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic text-center">רשימת מילים</h2>
         <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-80 h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none focus:border-[#facc15]"></textarea>
         <div class="flex gap-2 mb-4">
             <button onclick="exportWords()" class="bg-zinc-800 px-4 py-2 rounded-lg text-sm">ייצוא קובץ</button>
             <button onclick="document.getElementById('fileIn').click()" class="bg-zinc-800 px-4 py-2 rounded-lg text-sm">ייבוא קובץ</button>
             <input type="file" id="fileIn" class="hidden" onchange="importWords(this)">
         </div>
-        <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">אישור</button>
+        <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור וסגור</button>
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
@@ -79,7 +80,7 @@
     </div>
 
     <div id="winModal" class="modal text-center">
-        <h2 id="winTitle" class="text-6xl font-black mb-4 ltr-text"></h2>
+        <h2 id="winTitle" class="text-6xl font-black mb-4"></h2>
         <div id="winnerIcon" class="text-9xl mb-8"></div>
         <div id="statsBox" class="bg-zinc-900 p-4 rounded-2xl w-80 mb-8 border border-zinc-700">
             <h3 class="text-zinc-400 text-sm mb-2">מילים שדורשות תרגול:</h3>
