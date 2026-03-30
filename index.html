@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.6</title>
+    <title>Tic Tac Toe Bolt v. 2.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -12,11 +12,16 @@
         
         #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .logo-container { margin-top: 60px; margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
-
-        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
-        /* תיקון גובה הכותרת */
-        #statusHeader { margin-top: 40px; margin-bottom: 30px; }
+        /* ריווח הברק מהטקסט BOLT */
+        .bolt-text { margin-bottom: 25px; } 
+
+        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
+        
+        /* הורדת הכותרת וריווח חץ היציאה */
+        #statusHeader { margin-top: 50px; margin-bottom: 40px; }
+        .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; text-shadow: 0 0 10px rgba(255,255,255,0.5); z-index: 100; cursor: pointer; color: #555; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
 
         .board { 
             display: grid; 
@@ -28,7 +33,9 @@
         }
         
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
+        /* קווי אורך */
         .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 113px 0 0 #fff, 0 0 10px #fff, 113px 0 10px #fff; }
+        /* קווי רוחב */
         .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 113px 0 #fff, 0 0 10px #fff, 0 113px 10px #fff; }
         
         .cell { display: flex; align-items: center; justify-content: center; font-size: 6.5rem; font-weight: 900; width: 113px; height: 113px; cursor: pointer; z-index: 10; }
@@ -46,6 +53,7 @@
             color: #facc15; font-size: 5rem; font-weight: 900;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 50;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: question-pulse 2s infinite;
         }
 
@@ -57,9 +65,10 @@
             50% { transform: scale(1.1); box-shadow: 0 0 35px currentColor; }
         }
 
-        .back-btn { position: absolute; top: 45px; left: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 100; }
+        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px #facc15; z-index: 100; }
         .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
@@ -68,10 +77,11 @@
 
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
-        <div class="absolute top-5 right-5 text-zinc-800 font-mono text-xs">v. 2.6</div>
+        <div class="absolute top-5 right-5 text-zinc-800 font-mono text-xs">v. 2.7</div>
         <div class="logo-container">
             <h1 class="text-[#00f2ff] text-5xl font-black italic mb-1 leading-none">TIC TAC TOE</h1>
-            <h1 class="text-[#facc15] text-8xl font-black italic mt-0" style="text-shadow: 0 0 30px #facc15;">BOLT ⚡</h1>
+            <h1 class="text-[#facc15] text-8xl font-black italic mt-0 bolt-text" style="text-shadow: 0 0 30px #facc15;">BOLT</h1>
+            <img src="https://emojicdn.elk.sh/⚡" class="w-16 h-16" alt="bolt emogi">
         </div>
         <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
         <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
@@ -79,8 +89,8 @@
         <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
     </div>
 
-    <div id="gameUI" class="hidden flex-col items-center h-full">
-        <button onclick="location.reload()" class="back-btn text-4xl text-zinc-500 hover:text-white transition-colors">➔</button>
+    <div id="gameUI" class="hidden flex-col items-center justify-center h-full relative">
+        <div onclick="location.reload()" class="back-btn hover:text-white transition-colors">➔</div>
         
         <div id="statusHeader" class="text-5xl font-black italic"></div>
         
@@ -100,7 +110,7 @@
             <h2 class="text-[#facc15] text-3xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-lg space-y-4 mb-8">
                 <li>⚡ <b>החוק המרכזי:</b> לכל שחקן יש רק 3 סימנים. בסימן ה-4, הראשון ששמתם ייעלם!</li>
-                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה.</li>
+                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה. צבעו משתנה לפי התור.</li>
             </ul>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
         </div>
