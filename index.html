@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Complete Modal System</title>
+    <title>Super Tic Tac Toe - Educational Update</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        .grid-container { 
-            display: grid; grid-template-columns: 20px 320px; grid-template-rows: 20px 320px; 
-            gap: 10px; margin: 0 auto; justify-content: center;
-        }
-
+        .grid-container { display: grid; grid-template-columns: 20px 320px; grid-template-rows: 20px 320px; gap: 10px; margin: 0 auto; justify-content: center; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
         .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
@@ -25,16 +21,19 @@
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
 
-        .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 20px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
-        .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
-        .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
+        .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 20px; border: 2px solid; cursor: pointer; background: transparent; }
+        .btn-outline-yellow { border-color: #facc15; color: #facc15; }
+        .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; }
         
-        .back-btn { position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 100; }
+        .back-btn { position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; z-index: 100; }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .axis-label { color: #444; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        
+        /* יישור שמאלה עבור הודעת הניצחון */
+        .ltr { direction: ltr; unicode-bidi: bidi-override; }
     </style>
 </head>
 <body>
@@ -57,7 +56,7 @@
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div class="back-btn" onclick="location.reload()">←</div>
+        <div class="back-btn" onclick="location.reload()">➔</div>
         <div id="statusHeader" class="mb-4 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
         <div class="grid-container">
             <div></div>
@@ -69,7 +68,7 @@
     </div>
 
     <div id="vocabModal" class="modal">
-        <h2 class="text-[#facc15] text-4xl font-black mb-6 italic">הכנסת מילים</h2>
+        <h2 class="text-[#facc15] text-3xl font-black mb-6 italic">רשמו/הדביקו לפחות 2 מילים</h2>
         <div class="bg-zinc-900/50 p-4 rounded-[30px] border-2 border-zinc-700 w-80">
             <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-80 bg-black/80 text-white p-6 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15] text-lg"></textarea>
             <button onclick="saveVocab()" class="w-full h-14 bg-[#facc15] text-black font-extrabold rounded-xl text-xl">אישור</button>
@@ -78,7 +77,7 @@
 
     <div id="winModal" class="modal">
         <div class="text-center">
-            <h2 id="winTitle" class="text-7xl font-black italic mb-6 tracking-tighter"></h2>
+            <h2 id="winTitle" class="text-7xl font-black italic mb-6 tracking-tighter ltr"></h2>
             <div id="winnerIcon" class="text-[12rem] mb-14 leading-none"></div>
             <button onclick="location.reload()" class="btn-main btn-outline-yellow text-2xl h-20 mx-auto">משחק חדש</button>
         </div>
@@ -116,12 +115,12 @@
                 const p = l.split(/[–\-\—:]/); 
                 return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            if(vocab.length < 3) customAlert("נא להכניס לפחות 3 מילים כדי להתחיל!");
+            if(vocab.length < 2) customAlert("נא להכניס לפחות 2 מילים כדי להתחיל!");
             else hideModal('vocabModal');
         }
 
         function startGame(mode, diff = 'hard') {
-            if(vocab.length < 3) { customAlert("עצור! קודם צריך להכניס מילים."); return; }
+            if(vocab.length < 2) { customAlert("עצור! קודם צריך להכניס מילים."); return; }
             gameMode = mode; difficulty = diff; isGameOver = false;
             hideModal('lobby'); document.getElementById('gameUI').classList.replace('hidden', 'flex');
             initBoard(); startTurn();
@@ -167,7 +166,7 @@
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'w-full py-5 rounded-2xl border-2 border-zinc-800 text-white text-2xl font-black';
+                btn.className = 'w-full py-5 rounded-2xl border-2 border-zinc-800 text-white text-2xl font-black transition-colors duration-300';
                 btn.textContent = o;
                 btn.onclick = () => {
                     if(o === item.he) {
@@ -175,8 +174,16 @@
                         setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
                     } else {
                         playSound(150, 'square', 0.3); btn.style.borderColor = '#ef4444';
+                        // סימון התשובה הנכונה עבור התלמיד
+                        Array.from(container.children).forEach(b => {
+                            if(b.textContent === item.he) b.style.borderColor = '#22c55e';
+                        });
                         document.getElementById('quizModal').classList.add('shake');
-                        setTimeout(() => { hideModal('quizModal'); document.getElementById('quizModal').classList.remove('shake'); switchTurn(); }, 800);
+                        setTimeout(() => { 
+                            hideModal('quizModal'); 
+                            document.getElementById('quizModal').classList.remove('shake'); 
+                            switchTurn(); 
+                        }, 1200);
                     }
                 };
                 container.appendChild(btn);
@@ -200,7 +207,7 @@
             }());
             let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
             document.getElementById('winTitle').textContent = `${turn} - wins!`;
-            document.getElementById('winTitle').className = `text-7xl font-black italic mb-6 ${colorClass}`;
+            document.getElementById('winTitle').className = `text-7xl font-black italic mb-6 ${colorClass} ltr`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
             document.getElementById('winnerIcon').className = `text-[12rem] mb-14 ${colorClass}`;
             setTimeout(() => showModal('winModal'), 800);
