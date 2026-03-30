@@ -3,89 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Neon Outline Edition</title>
+    <title>Super Tic Tac Toe - Clear Quiz Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
+        /* לוח המשחק */
         .grid-container { display: grid; grid-template-columns: 40px 320px; grid-template-rows: 40px 320px; gap: 10px; margin: 0 auto; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
         .board::before { width: 5px; height: 100%; left: 33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
         .board::after { height: 5px; width: 100%; top: 33%; box-shadow: 0 106px 0 #fff, 0 0 10px #fff, 0 106px 10px #fff; }
 
+        /* סימני חרבות אור בלוח בלבד */
         .cell { display: flex; align-items: center; justify-content: center; font-size: 6rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; }
-        
-        .x-lightsaber { 
-            color: #fff; 
-            text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.5);
-        }
-        
-        .o-lightsaber { 
-            color: #fff; 
-            text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.5);
-        }
-
+        .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
+        .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
 
-        /* כפתורים בגובה אחיד, כולם Outline */
-        .btn-main { 
-            width: 300px; 
-            height: 65px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px; 
-            font-weight: 900; 
-            margin-bottom: 12px; 
-            transition: 0.2s; 
-            border: 2px solid; 
-            cursor: pointer; 
-            text-align: center;
-            background: transparent;
-        }
+        /* צבעים נקיים למילים בשאלה (ללא זוהר) */
+        .text-x-clean { color: #00f2ff; }
+        .text-o-clean { color: #bc13fe; }
 
-        /* צבעי Outline ייחודיים */
-        .btn-outline-yellow { 
-            border-color: #facc15; 
-            color: #facc15; 
-            box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
-        }
-        
-        /* 2 שחקנים - שילוב של תכלת וסגול */
-        .btn-outline-multi {
-            border-color: #fff;
-            color: #fff;
-            box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff;
-            text-shadow: 0 0 5px #fff;
-        }
-
-        .btn-outline-cyan { 
-            border-color: #00f2ff; 
-            color: #00f2ff; 
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-        }
-        
-        /* מאתגר - סגול זוהר */
-        .btn-outline-purple {
-            border-color: #bc13fe; 
-            color: #bc13fe; 
-            box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
-        }
-
+        /* כפתורי תפריט */
+        .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 12px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
+        .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
+        .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
+        .btn-outline-cyan { border-color: #00f2ff; color: #00f2ff; }
+        .btn-outline-purple { border-color: #bc13fe; color: #bc13fe; }
         .btn-main:active { transform: scale(0.95); }
-
-        .help-btn {
-            position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%;
-            border: 2px solid #fff; color: #00f2ff; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: bold; z-index: 100; box-shadow: 0 0 15px #00f2ff;
-            animation: pulse-glow 2s infinite; cursor: pointer;
-        }
-        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px #00f2ff; transform: scale(1); } 50% { box-shadow: 0 0 20px #00f2ff; transform: scale(1.1); } }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .axis-label { color: #555; font-weight: 900; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
@@ -96,10 +44,8 @@
 <body>
 
     <div id="lobby" class="modal" style="display: flex;">
-        <div class="help-btn" onclick="showModal('helpModal')">?</div>
         <h1 class="text-[#00f2ff] text-8xl font-black italic mb-2 tracking-tighter" style="text-shadow: 0 0 20px #00f2ff;">SUPER</h1>
         <h1 class="text-[#bc13fe] text-5xl font-black italic mb-14 tracking-tighter" style="text-shadow: 0 0 15px #bc13fe;">TIC TAC TOE</h1>
-        
         <button onclick="showModal('vocabModal')" class="btn-main btn-outline-yellow text-lg">הכנסת מילים</button>
         <button onclick="startGame('pvp')" class="btn-main btn-outline-multi text-xl">2 שחקנים</button>
         <button onclick="startGame('pvc', 'hard')" class="btn-main btn-outline-purple text-xl">שחקן VS מחשב (מאתגר)</button>
@@ -129,19 +75,7 @@
         <div class="text-center">
             <h2 id="winTitle" class="text-8xl font-black italic mb-6">ניצחון!</h2>
             <div id="winnerIcon" class="text-[12rem] mb-14 leading-none"></div>
-            <button onclick="location.reload()" class="btn-main btn-outline-yellow text-2xl h-20 mx-auto" style="border-color: #facc15;">משחק חדש</button>
-        </div>
-    </div>
-
-    <div id="helpModal" class="modal px-6 text-right">
-        <div class="bg-zinc-900 p-8 rounded-[40px] border-2 border-[#00f2ff] max-w-sm">
-            <h2 class="text-[#00f2ff] text-3xl font-bold text-center mb-8">חוקי המשחק</h2>
-            <div class="space-y-5 text-zinc-100 font-bold text-lg" dir="rtl">
-                <p>💡 עונים נכון כדי לסמן בלוח.</p>
-                <p>♻️ רק 3 סימנים לכל שחקן.</p>
-                <p>⚠️ הסימן הרביעי מוחק את הראשון!</p>
-            </div>
-            <button onclick="hideModal('helpModal')" class="mt-10 bg-white text-black font-bold h-14 rounded-2xl w-full text-lg">הבנתי</button>
+            <button onclick="location.reload()" class="btn-main btn-outline-yellow text-2xl h-20 mx-auto">משחק חדש</button>
         </div>
     </div>
 
@@ -212,8 +146,12 @@
                 if(!opts.includes(r)) opts.push(r);
             }
             opts.sort(() => Math.random() - 0.5);
-            document.getElementById('qText').textContent = item.en;
-            document.getElementById('qText').className = `text-7xl font-black mb-16 italic ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            
+            // עדכון: המילה בשאלה צבעונית אך ללא זוהר
+            const qEl = document.getElementById('qText');
+            qEl.textContent = item.en;
+            qEl.className = `text-7xl font-black mb-16 italic text-center px-6 ${turn === 'X' ? 'text-x-clean' : 'text-o-clean'}`;
+            
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
@@ -238,10 +176,7 @@
             board[i] = turn; history[turn].push(i);
             if(history[turn].length > 3) board[history[turn].shift()] = "";
             render();
-            if(checkWin(board, turn)) {
-                triggerWin();
-                return;
-            }
+            if(checkWin(board, turn)) { triggerWin(); return; }
             canMove = false; switchTurn();
         }
 
@@ -252,7 +187,6 @@
                 confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#00f2ff', '#bc13fe', '#facc15'] });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
-            
             let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
             document.getElementById('winTitle').textContent = `ניצחון ל-${turn}!`;
             document.getElementById('winTitle').className = `text-8xl font-black italic mb-6 ${colorClass}`;
