@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Centered Board</title>
+    <title>Super Tic Tac Toe - Victory Freeze</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        /* לוח ממורכז עם מספור קטן */
         .grid-container { 
             display: grid; 
             grid-template-columns: 20px 320px; 
             grid-template-rows: 20px 320px; 
             gap: 10px; 
             margin: 0 auto;
-            justify-content: center; /* מבטיח מרכוז אופקי מלא */
+            justify-content: center;
         }
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
@@ -33,7 +32,6 @@
         .text-x-clean { color: #00f2ff; }
         .text-o-clean { color: #bc13fe; }
 
-        /* כפתורי תפריט */
         .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 20px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
         .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
@@ -41,7 +39,7 @@
         .back-btn {
             position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%;
             border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: bold; cursor: pointer; z-index: 100;
+            font-size: 24px; font-weight: bold; cursor: pointer; z-index: 100;
         }
 
         #nextQuestionBtn {
@@ -51,7 +49,6 @@
         }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        /* מספור קטן ועדין */
         .axis-label { color: #444; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
         
         .shake { animation: shake 0.4s; }
@@ -70,8 +67,7 @@
     </div>
 
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div class="back-btn" onclick="location.reload()">➔</div>
-        
+        <div class="back-btn" onclick="location.reload()">←</div>
         <div id="statusHeader" class="mb-4 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
         
         <div class="grid-container">
@@ -94,7 +90,7 @@
 
     <div id="winModal" class="modal">
         <div class="text-center">
-            <h2 id="winTitle" class="text-8xl font-black italic mb-6">ניצחון!</h2>
+            <h2 id="winTitle" class="text-7xl font-black italic mb-6 tracking-tighter"></h2>
             <div id="winnerIcon" class="text-[12rem] mb-14 leading-none"></div>
             <button onclick="location.reload()" class="btn-main btn-outline-yellow text-2xl h-20 mx-auto">משחק חדש</button>
         </div>
@@ -106,7 +102,7 @@
     </div>
 
     <script>
-        let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false;
+        let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(freq, type, duration) {
@@ -133,7 +129,7 @@
 
         function startGame(mode, diff = 'hard') {
             if(vocab.length < 3) { showModal('vocabModal'); return; }
-            gameMode = mode; difficulty = diff;
+            gameMode = mode; difficulty = diff; isGameOver = false;
             hideModal('lobby'); document.getElementById('gameUI').classList.replace('hidden', 'flex');
             initBoard(); startTurn();
         }
@@ -142,13 +138,14 @@
             const b = document.getElementById('mainBoard'); b.innerHTML = '';
             for(let i=0; i<9; i++) {
                 const c = document.createElement('div'); c.className = 'cell';
-                c.onclick = () => { if(canMove && board[i] === "") makeMove(i); };
+                c.onclick = () => { if(canMove && !isGameOver && board[i] === "") makeMove(i); };
                 b.appendChild(c);
             }
             render();
         }
 
         function startTurn() {
+            if (isGameOver) return;
             if (gameMode === 'pvc' && turn === 'O') {
                 document.getElementById('statusHeader').textContent = "המחשב חושב...";
                 document.getElementById('nextQuestionBtn').classList.add('hidden');
@@ -196,10 +193,21 @@
 
         function makeMove(i) {
             board[i] = turn; history[turn].push(i);
+            
+            // בדיקת ניצחון לפני מחיקת הסימן ה-4
+            if(checkWin(board, turn)) { 
+                isGameOver = true;
+                render(); 
+                triggerWin(); 
+                return; 
+            }
+
+            // אם לא ניצח, ממשיכים בחוק המחיקה
             if(history[turn].length > 3) board[history[turn].shift()] = "";
+            
             render();
-            if(checkWin(board, turn)) { triggerWin(); return; }
-            canMove = false; switchTurn();
+            canMove = false; 
+            switchTurn();
         }
 
         function triggerWin() {
@@ -210,20 +218,21 @@
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
             let colorClass = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
-            document.getElementById('winTitle').textContent = `ניצחון ל-${turn}!`;
-            document.getElementById('winTitle').className = `text-8xl font-black italic mb-6 ${colorClass}`;
+            document.getElementById('winTitle').textContent = `${turn} - wins!`;
+            document.getElementById('winTitle').className = `text-7xl font-black italic mb-6 ${colorClass}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
             document.getElementById('winnerIcon').className = `text-[12rem] mb-14 ${colorClass}`;
-            setTimeout(() => showModal('winModal'), 500);
+            setTimeout(() => showModal('winModal'), 800);
         }
 
-        function switchTurn() { turn = turn === "X" ? "O" : "X"; render(); startTurn(); }
+        function switchTurn() { if(!isGameOver) { turn = turn === "X" ? "O" : "X"; render(); startTurn(); } }
 
         function render() {
             document.querySelectorAll('.cell').forEach((c, i) => {
                 const v = board[i]; c.textContent = v === "X" ? "✕" : (v === "O" ? "◯" : "");
                 c.className = "cell " + (v === "X" ? "x-lightsaber" : (v === "O" ? "o-lightsaber" : ""));
-                if(v && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
+                // אפקט Ghost רק אם המשחק עדיין רץ
+                if(!isGameOver && v && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
             });
         }
 
@@ -233,6 +242,7 @@
         }
 
         function aiAction() {
+            if (isGameOver) return;
             let m;
             if(difficulty === 'easy') {
                 const av = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
