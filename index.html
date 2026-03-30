@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - Victory Freeze</title>
+    <title>Super Tic Tac Toe - Complete Modal System</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -11,12 +11,8 @@
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
         .grid-container { 
-            display: grid; 
-            grid-template-columns: 20px 320px; 
-            grid-template-rows: 20px 320px; 
-            gap: 10px; 
-            margin: 0 auto;
-            justify-content: center;
+            display: grid; grid-template-columns: 20px 320px; grid-template-rows: 20px 320px; 
+            gap: 10px; margin: 0 auto; justify-content: center;
         }
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; position: relative; }
@@ -29,33 +25,27 @@
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
         .ghost { opacity: 0.15; filter: blur(2px); }
 
-        .text-x-clean { color: #00f2ff; }
-        .text-o-clean { color: #bc13fe; }
-
         .btn-main { width: 300px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 20px; transition: 0.2s; border: 2px solid; cursor: pointer; background: transparent; }
         .btn-outline-yellow { border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
         .btn-outline-multi { border-color: #fff; color: #fff; box-shadow: 0 0 15px #bc13fe, inset 0 0 10px #00f2ff; text-shadow: 0 0 5px #fff; }
         
-        .back-btn {
-            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; font-weight: bold; cursor: pointer; z-index: 100;
-        }
-
-        #nextQuestionBtn {
-            margin-top: 40px;
-            border-color: #facc15; color: #facc15;
-            background: rgba(250, 204, 21, 0.1);
-        }
+        .back-btn { position: absolute; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; z-index: 100; }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .axis-label { color: #444; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
-        
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
+
+    <div id="alertModal" class="modal">
+        <div class="bg-zinc-900 border-2 border-red-500 p-8 rounded-[30px] text-center w-80">
+            <div class="text-red-500 text-6xl mb-4">⚠️</div>
+            <p id="alertMsg" class="text-white text-xl font-bold mb-6"></p>
+            <button onclick="hideModal('alertModal')" class="w-full py-3 bg-red-500 text-black font-black rounded-xl">הבנתי</button>
+        </div>
+    </div>
 
     <div id="lobby" class="modal" style="display: flex;">
         <h1 class="text-[#00f2ff] text-8xl font-black italic mb-2 tracking-tighter" style="text-shadow: 0 0 20px #00f2ff;">SUPER</h1>
@@ -69,15 +59,13 @@
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
         <div class="back-btn" onclick="location.reload()">←</div>
         <div id="statusHeader" class="mb-4 text-3xl font-black italic">תור: <span id="turnInfo"></span></div>
-        
         <div class="grid-container">
             <div></div>
             <div class="grid grid-cols-3 w-full"><div class="axis-label">1</div><div class="axis-label">2</div><div class="axis-label">3</div></div>
             <div class="flex flex-col h-full justify-around"><div class="axis-label">A</div><div class="axis-label">B</div><div class="axis-label">C</div></div>
             <div id="mainBoard" class="board"></div>
         </div>
-        
-        <button id="nextQuestionBtn" onclick="showQuiz()" class="btn-main hidden">לחץ לשאלה הבאה</button>
+        <button id="nextQuestionBtn" onclick="showQuiz()" class="btn-main hidden" style="margin-top: 40px; border-color: #facc15; color: #facc15; background: rgba(250, 204, 21, 0.1);">לחץ לשאלה הבאה</button>
     </div>
 
     <div id="vocabModal" class="modal">
@@ -117,18 +105,23 @@
         const showModal = id => document.getElementById(id).style.display = 'flex';
         const hideModal = id => document.getElementById(id).style.display = 'none';
 
+        function customAlert(msg) {
+            document.getElementById('alertMsg').textContent = msg;
+            showModal('alertModal');
+        }
+
         function saveVocab() {
             const raw = document.getElementById('vIn').value;
             vocab = raw.split('\n').map(l => {
                 const p = l.split(/[–\-\—:]/); 
                 return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            if(vocab.length < 3) alert("נא להכניס לפחות 3 מילים!");
+            if(vocab.length < 3) customAlert("נא להכניס לפחות 3 מילים כדי להתחיל!");
             else hideModal('vocabModal');
         }
 
         function startGame(mode, diff = 'hard') {
-            if(vocab.length < 3) { showModal('vocabModal'); return; }
+            if(vocab.length < 3) { customAlert("עצור! קודם צריך להכניס מילים."); return; }
             gameMode = mode; difficulty = diff; isGameOver = false;
             hideModal('lobby'); document.getElementById('gameUI').classList.replace('hidden', 'flex');
             initBoard(); startTurn();
@@ -169,7 +162,7 @@
             
             const qEl = document.getElementById('qText');
             qEl.textContent = item.en;
-            qEl.className = `text-7xl font-black mb-16 italic text-center px-6 ${turn === 'X' ? 'text-x-clean' : 'text-o-clean'}`;
+            qEl.className = `text-7xl font-black mb-16 italic text-center px-6 ${turn === 'X' ? 'text-[#00f2ff]' : 'text-[#bc13fe]'}`;
             
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
@@ -193,21 +186,9 @@
 
         function makeMove(i) {
             board[i] = turn; history[turn].push(i);
-            
-            // בדיקת ניצחון לפני מחיקת הסימן ה-4
-            if(checkWin(board, turn)) { 
-                isGameOver = true;
-                render(); 
-                triggerWin(); 
-                return; 
-            }
-
-            // אם לא ניצח, ממשיכים בחוק המחיקה
+            if(checkWin(board, turn)) { isGameOver = true; render(); triggerWin(); return; }
             if(history[turn].length > 3) board[history[turn].shift()] = "";
-            
-            render();
-            canMove = false; 
-            switchTurn();
+            render(); canMove = false; switchTurn();
         }
 
         function triggerWin() {
@@ -231,7 +212,6 @@
             document.querySelectorAll('.cell').forEach((c, i) => {
                 const v = board[i]; c.textContent = v === "X" ? "✕" : (v === "O" ? "◯" : "");
                 c.className = "cell " + (v === "X" ? "x-lightsaber" : (v === "O" ? "o-lightsaber" : ""));
-                // אפקט Ghost רק אם המשחק עדיין רץ
                 if(!isGameOver && v && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
             });
         }
