@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 2.5</title>
+    <title>Tic Tac Toe Bolt v. 2.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -13,9 +13,11 @@
         #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .logo-container { margin-top: 60px; margin-bottom: 50px; display: flex; flex-direction: column; align-items: center; }
 
-        /* מרכוז נקי ללא הפרעות */
-        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
+        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
+        /* תיקון גובה הכותרת */
+        #statusHeader { margin-top: 40px; margin-bottom: 30px; }
+
         .board { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -26,9 +28,7 @@
         }
         
         .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
-        /* קווי אורך */
         .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 113px 0 0 #fff, 0 0 10px #fff, 113px 0 10px #fff; }
-        /* קווי רוחב */
         .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 113px 0 #fff, 0 0 10px #fff, 0 113px 10px #fff; }
         
         .cell { display: flex; align-items: center; justify-content: center; font-size: 6.5rem; font-weight: 900; width: 113px; height: 113px; cursor: pointer; z-index: 10; }
@@ -46,7 +46,6 @@
             color: #facc15; font-size: 5rem; font-weight: 900;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 50;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: question-pulse 2s infinite;
         }
 
@@ -58,10 +57,9 @@
             50% { transform: scale(1.1); box-shadow: 0 0 35px currentColor; }
         }
 
-        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px #facc15; z-index: 100; }
+        .back-btn { position: absolute; top: 45px; left: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .help-btn { position: absolute; top: 15px; left: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 100; }
         .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
@@ -70,7 +68,7 @@
 
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
-        <div class="absolute top-5 right-5 text-zinc-800 font-mono text-xs">v. 2.5</div>
+        <div class="absolute top-5 right-5 text-zinc-800 font-mono text-xs">v. 2.6</div>
         <div class="logo-container">
             <h1 class="text-[#00f2ff] text-5xl font-black italic mb-1 leading-none">TIC TAC TOE</h1>
             <h1 class="text-[#facc15] text-8xl font-black italic mt-0" style="text-shadow: 0 0 30px #facc15;">BOLT ⚡</h1>
@@ -81,10 +79,10 @@
         <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
     </div>
 
-    <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <button onclick="location.reload()" class="absolute top-5 right-5 text-4xl text-zinc-500 hover:text-white transition-colors">➔</button>
+    <div id="gameUI" class="hidden flex-col items-center h-full">
+        <button onclick="location.reload()" class="back-btn text-4xl text-zinc-500 hover:text-white transition-colors">➔</button>
         
-        <div id="statusHeader" class="mb-10 text-5xl font-black italic"></div>
+        <div id="statusHeader" class="text-5xl font-black italic"></div>
         
         <div class="game-wrapper">
             <div id="mainBoard" class="board"></div>
@@ -102,38 +100,27 @@
             <h2 class="text-[#facc15] text-3xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-lg space-y-4 mb-8">
                 <li>⚡ <b>החוק המרכזי:</b> לכל שחקן יש רק 3 סימנים. בסימן ה-4, הראשון ששמתם ייעלם!</li>
-                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה. צבעו משתנה לפי התור.</li>
-                <li>⚡ <b>ניצחון:</b> 3 ברצף (אופקי, אנכי או אלכסוני).</li>
+                <li>⚡ <b>סימן השאלה:</b> לחצו עליו כדי לקבל מילה.</li>
             </ul>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
         </div>
     </div>
 
     <div id="aiDifficultyModal" class="modal">
-        <h2 class="text-white text-3xl font-black mb-8 italic text-center">בחר רמת קושי למחשב</h2>
+        <h2 class="text-white text-3xl font-black mb-8 italic text-center">בחר רמת קושי</h2>
         <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'easy')" class="btn-main border-[#00f2ff] text-[#00f2ff]">קל</button>
         <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
-        <button onclick="hideModal('aiDifficultyModal')" class="text-zinc-500 mt-4 underline">ביטול</button>
     </div>
 
     <div id="vocabModal" class="modal">
         <h2 class="text-[#facc15] text-3xl font-black mb-4 italic text-center">רשימת מילים</h2>
         <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-80 h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none focus:border-[#facc15]"></textarea>
-        <div class="flex gap-2 mb-4">
-            <button onclick="exportWords()" class="bg-zinc-800 px-4 py-2 rounded-lg text-sm">ייצוא קובץ</button>
-            <button onclick="document.getElementById('fileIn').click()" class="bg-zinc-800 px-4 py-2 rounded-lg text-sm">ייבוא קובץ</button>
-            <input type="file" id="fileIn" class="hidden" onchange="importWords(this)">
-        </div>
         <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור וסגור</button>
     </div>
 
     <div id="winModal" class="modal text-center">
         <h2 id="winTitle" class="text-6xl font-black mb-4"></h2>
         <div id="winnerIcon" class="text-9xl mb-8"></div>
-        <div id="statsBox" class="bg-zinc-900 p-4 rounded-2xl w-80 mb-8 border border-zinc-700">
-            <h3 class="text-zinc-400 text-sm mb-2">מילים שדורשות תרגול:</h3>
-            <div id="hardWords" class="text-red-400 font-bold italic"></div>
-        </div>
         <button onclick="location.reload()" class="btn-main border-[#facc15] text-[#facc15]">משחק חדש</button>
     </div>
 
@@ -208,16 +195,6 @@
             if(gameMode === 'speed') startTimer();
         }
 
-        function startTimer() {
-            let time = 100;
-            const bar = document.getElementById('speedTimer');
-            clearInterval(speedInterval);
-            speedInterval = setInterval(() => {
-                time -= 2; bar.style.width = time + "%";
-                if(time <= 0) { clearInterval(speedInterval); handleAnswer(false, null, {he:'', en: 'זמן עבר'}); }
-            }, 100);
-        }
-
         function handleAnswer(isCorrect, btn, item) {
             clearInterval(speedInterval);
             document.getElementById('speedTimer').style.width = "0%";
@@ -226,12 +203,7 @@
                 setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
             } else {
                 if(btn) btn.style.borderColor = '#ef4444';
-                if(item.en !== 'זמן עבר') stats[item.en] = (stats[item.en] || 0) + 1;
-                document.getElementById('quizModal').classList.add('shake');
-                setTimeout(() => { 
-                    hideModal('quizModal'); document.getElementById('quizModal').classList.remove('shake');
-                    switchTurn(); 
-                }, 1200);
+                setTimeout(() => { hideModal('quizModal'); switchTurn(); }, 1200);
             }
         }
 
@@ -250,8 +222,6 @@
             title.className = `text-7xl font-black mb-4 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
             document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
             document.getElementById('winnerIcon').className = `text-9xl mb-8 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
-            const hard = Object.entries(stats).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
-            document.getElementById('hardWords').textContent = hard.length ? hard.join(', ') : 'אין טעויות! פנטסטי!';
             setTimeout(() => showModal('winModal'), 600);
         }
 
@@ -298,18 +268,6 @@
                 }
             }
             return best;
-        }
-
-        function exportWords() {
-            const blob = new Blob([document.getElementById('vIn').value], {type: 'text/plain'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'words.txt'; a.click();
-        }
-
-        function importWords(input) {
-            const reader = new FileReader();
-            reader.onload = e => { document.getElementById('vIn').value = e.target.result; localStorage.setItem('ttt_vocab', e.target.result); };
-            reader.readAsText(input.files[0]);
         }
     </script>
 </body>
