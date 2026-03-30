@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - V1.9 Final</title>
+    <title>Super Tic Tac Toe - V2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -25,7 +25,7 @@
         const db = getFirestore(app);
 
         window.startOnline = async () => {
-            if (!window.vocab || window.vocab.length < 3) return showStatusModal("הוסף לפחות 3 מילים!");
+            if (!window.vocab || window.vocab.length < 3) return showStatusModal("אנה הזן לפחות 3 מילים");
             const id = Math.random().toString(36).substring(2, 7).toUpperCase();
             window.gameId = id; window.myRole = "X"; window.mode = "online";
             
@@ -34,7 +34,7 @@
                 vocabulary: window.vocab, history: {X:[], O:[]}, asking: false
             });
             
-            document.getElementById('gameLink').value = `https://hezicg-apps.github.io/super-tic-tac-toe/?game=${id}`;
+            document.getElementById('gameLink').value = `${window.location.origin}${window.location.pathname}?game=${id}`;
             document.getElementById('lobbyMain').style.display = 'none';
             document.getElementById('onlineWait').style.display = 'flex';
             document.getElementById('gameCodeText').textContent = id;
@@ -42,8 +42,8 @@
         };
 
         window.joinGame = async (id) => {
-            if (!id) return;
-            const cleanId = id.trim().toUpperCase();
+            const cleanId = id?.trim().toUpperCase();
+            if (!cleanId) return;
             const snap = await getDoc(doc(db, 'games', cleanId));
             if (snap.exists()) {
                 window.gameId = cleanId; window.myRole = "O"; window.mode = "online";
@@ -58,13 +58,10 @@
                 const data = snap.data();
                 if (!data) return;
                 window.state = data;
-                
                 if (data.status === "playing") {
                     document.getElementById('lobby').style.display = 'none';
                     document.getElementById('gameUI').style.display = 'flex';
                     render();
-                    
-                    // ניהול מודל השאלה - מוודא סנכרון מלא
                     if (data.turn === window.myRole && !data.asking && !window.localAsking) {
                         window.localAsking = true;
                         updateDoc(doc(db, 'games', window.gameId), { asking: true });
@@ -85,45 +82,70 @@
 
     <style>
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; margin: 0 auto; background: #000; }
-        .cell { display: flex; align-items: center; justify-content: center; font-size: 5rem; font-weight: bold; width: 106px; height: 106px; position: relative; }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; height: 320px; margin: 0 auto; }
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 5rem; font-weight: bold; width: 106px; height: 106px; }
         .cell:nth-child(2), .cell:nth-child(5), .cell:nth-child(8) { border-left: 4px solid #fff; border-right: 4px solid #fff; }
         .cell:nth-child(4), .cell:nth-child(5), .cell:nth-child(6) { border-top: 4px solid #fff; border-bottom: 4px solid #fff; }
         .x-neon { color: #00f2ff; text-shadow: 0 0 15px #00f2ff; }
         .o-neon { color: #bc13fe; text-shadow: 0 0 15px #bc13fe; }
         .ghost { opacity: 0.2; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.05; } }
-        .btn { width: 280px; height: 50px; border-radius: 15px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; transition: all 0.2s; }
+        .btn { width: 280px; height: 55px; border-radius: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .help-btn { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #00f2ff; color: #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; z-index: 50; }
         .modal { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="lobby" class="modal">
+        <div class="help-btn" onclick="showModal('helpModal')">?</div>
+        
         <div id="lobbyMain" class="flex flex-col items-center">
-            <h1 class="text-[#00f2ff] text-5xl font-black italic mb-2">SUPER</h1>
-            <h1 class="text-[#bc13fe] text-4xl font-black italic mb-10">TIC TAC TOE</h1>
-            <button onclick="showModal('vocabModal')" class="btn border-2 border-[#facc15] text-[#facc15]">1. הוספת מילים</button>
-            <button onclick="initGame('ai')" class="btn bg-[#facc15] text-black">משחק נגד המחשב</button>
-            <button onclick="startOnline()" class="btn bg-green-600 text-white">שחק אונליין עם חבר</button>
-            <div class="h-4"></div>
-            <input type="text" id="joinInput" placeholder="קוד מחבר" class="btn bg-transparent border-zinc-700 text-center text-white">
-            <button onclick="joinGame(document.getElementById('joinInput').value)" class="btn border-zinc-700 text-zinc-500">הצטרף למשחק</button>
+            <h1 class="text-[#00f2ff] text-6xl font-black italic mb-2 tracking-tighter">SUPER</h1>
+            <h1 class="text-[#bc13fe] text-4xl font-black italic mb-12 tracking-tighter">TIC TAC TOE</h1>
+            
+            <button onclick="showModal('vocabModal')" class="btn border-2 border-[#facc15] text-[#facc15] text-lg">לחצו להוספת מילים למשחק</button>
+            <button onclick="startOnline()" class="btn bg-[#facc15] text-black text-lg">משחק אונליין (שלח לינק)</button>
+            
+            <div class="mt-4 mb-2 text-zinc-600 text-sm">הקלידו קוד הצטרפות</div>
+            <input type="text" id="joinInput" class="btn bg-transparent border-2 border-zinc-800 text-center text-white focus:border-[#facc15] outline-none">
+            <button onclick="joinGame(document.getElementById('joinInput').value)" class="btn border-2 border-zinc-800 text-zinc-500">הצטרף</button>
         </div>
 
         <div id="onlineWait" style="display:none;" class="flex flex-col items-center px-8 text-center">
-            <h2 class="text-xl mb-4">המשחק מוכן!</h2>
-            <div id="gameCodeText" class="text-6xl font-bold text-yellow-500 mb-6"></div>
-            <input type="text" id="gameLink" readonly class="w-full p-2 bg-zinc-900 text-[10px] text-center mb-4 rounded border border-zinc-700">
+            <div id="gameCodeText" class="text-7xl font-bold text-[#facc15] mb-8"></div>
+            <p class="text-zinc-400 mb-4">מחכה לחבר/ה...</p>
+            <input type="text" id="gameLink" readonly class="w-full p-3 bg-zinc-900 text-[10px] text-center mb-6 rounded-xl border border-zinc-800 text-zinc-500">
             <button onclick="copyLink()" class="btn bg-[#facc15] text-black w-full">העתק קישור</button>
-            <p class="animate-pulse text-zinc-500 mt-6">ברגע שהחבר ילחץ על הקישור, המשחק יתחיל אצל שניכם...</p>
+        </div>
+    </div>
+
+    <div id="helpModal" style="display:none;" class="modal bg-black/95 px-6">
+        <div class="bg-zinc-900 p-8 rounded-[30px] border-2 border-[#00f2ff] w-full max-w-xs relative">
+            <h2 class="text-[#00f2ff] text-2xl font-bold text-center mb-8">חוקי המשחק</h2>
+            <div class="space-y-6 text-right" dir="rtl">
+                <p class="flex items-center gap-3"><span>🎯</span> <span>עונים על שאלה באנגלית כדי לקבל תור.</span></p>
+                <p class="flex items-center gap-3"><span>❌</span> <span>מותר רק 3 סימנים על הלוח לכל שחקן.</span></p>
+                <p class="flex items-center gap-3"><span>⚠️</span> <span>הסימן הרביעי ימחוק את הסימן הראשון שלך!</span></p>
+                <p class="flex items-center gap-3"><span>👻</span> <span>הסימן שעומד להיעלם יהיה חצי שקוף.</span></p>
+            </div>
+            <button onclick="hideModal('helpModal')" class="mt-10 bg-[#facc15] text-black font-bold py-4 rounded-2xl w-full text-lg">הבנתי!</button>
+        </div>
+    </div>
+
+    <div id="vocabModal" style="display:none;" class="modal bg-black/95">
+        <div class="bg-zinc-900 p-6 rounded-[30px] border-2 border-[#facc15] w-80">
+            <h2 class="text-[#facc15] text-xl font-bold text-center mb-4">הזנת מילים למשחק</h2>
+            <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-48 bg-black text-white p-4 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15]"></textarea>
+            <button onclick="saveVocab()" class="btn bg-[#facc15] text-black w-full mb-0">שמור מילים</button>
         </div>
     </div>
 
     <div id="gameUI" style="display:none;" class="flex flex-col h-full">
-        <div class="h-24 flex flex-col items-center justify-center border-b border-zinc-900 bg-black z-10">
-            <h2 id="turnText" class="text-2xl font-black italic"></h2>
-            <p id="subStatus" class="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest"></p>
+        <div class="h-24 flex items-center justify-center border-b border-zinc-900">
+            <h2 id="turnText" class="text-3xl font-black italic flex items-center gap-3">
+                תור השחקן <span id="turnIcon"></span>
+            </h2>
         </div>
         <div class="flex-grow flex items-center justify-center">
             <div class="board">
@@ -134,22 +156,15 @@
         </div>
     </div>
 
-    <div id="vocabModal" style="display:none;" class="modal bg-black/95">
-        <div class="bg-zinc-900 p-6 rounded-3xl border-2 border-[#facc15] w-80">
-            <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-40 bg-black text-white p-4 rounded-xl border border-zinc-800 text-right mb-4"></textarea>
-            <button onclick="saveVocab()" class="btn bg-[#facc15] text-black w-full">שמור מילים</button>
-        </div>
-    </div>
-
     <div id="quiz" style="display:none;" class="modal bg-black/98">
-        <div id="qW" class="text-6xl font-black mb-12 italic text-center px-4"></div>
+        <div id="qW" class="text-6xl font-black mb-16 italic"></div>
         <div id="opts" class="flex flex-col items-center w-full px-10"></div>
     </div>
 
     <div id="statusModal" style="display:none;" class="modal bg-black/90">
         <div class="bg-zinc-900 p-8 rounded-3xl text-center">
-            <p id="statusMsg" class="text-xl mb-6 font-bold"></p>
-            <button onclick="hideModal('statusModal')" class="btn bg-[#facc15] text-black">הבנתי</button>
+            <p id="statusMsg" class="text-xl mb-6"></p>
+            <button onclick="hideModal('statusModal')" class="btn bg-[#facc15] text-black">אישור</button>
         </div>
     </div>
 
@@ -167,18 +182,12 @@
                 const p = l.split('-');
                 return p.length === 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            hideModal('vocabModal');
+            if(window.vocab.length >= 3) hideModal('vocabModal');
         }
 
         function copyLink() {
             const el = document.getElementById('gameLink'); el.select(); document.execCommand('copy');
-            showStatusModal("הקישור הועתק! שלח אותו עכשיו.");
-        }
-
-        function initGame(m) {
-            if (vocab.length < 3) return showStatusModal("הוסף מילים!");
-            window.mode = m; hideModal('lobby'); showModal('gameUI');
-            render(); ask();
+            showStatusModal("הקישור הועתק!");
         }
 
         function ask() {
@@ -191,22 +200,23 @@
             options.sort(() => Math.random() - 0.5);
 
             document.getElementById('qW').textContent = item.en;
-            document.getElementById('qW').className = `text-6xl font-black mb-12 italic text-center ${state.turn==='X'?'x-neon':'o-neon'}`;
+            document.getElementById('qW').className = `text-6xl font-black mb-16 italic ${state.turn==='X'?'x-neon':'o-neon'}`;
             
             const container = document.getElementById('opts'); container.innerHTML = '';
             options.forEach(o => {
                 const b = document.createElement('button');
-                b.className = 'btn border border-zinc-800 text-white w-full'; b.textContent = o;
+                b.className = 'btn border-2 border-zinc-800 text-white w-full text-xl'; b.textContent = o;
                 b.onclick = async () => {
                     if(o === item.he) {
-                        b.style.background = '#22c55e';
+                        b.style.borderColor = '#22c55e'; b.style.color = '#22c55e';
                         setTimeout(() => { hideModal('quiz'); window.state.canMove = true; }, 600);
                     } else {
-                        b.style.background = '#ef4444';
+                        b.style.borderColor = '#ef4444'; b.style.color = '#ef4444';
                         setTimeout(async () => { 
                             hideModal('quiz'); 
+                            window.state.turn = window.state.turn === "X" ? "O" : "X";
                             if(window.mode === 'online') await window.syncMove();
-                            else next(); 
+                            else render(); 
                         }, 1000);
                     }
                 };
@@ -227,38 +237,22 @@
             }
             
             window.state.canMove = false;
-            window.state.turn = window.state.turn === "X" ? "O" : "X";
-            render();
-            
-            if (window.mode === "online") {
-                await window.syncMove();
-            } else if (window.mode === "ai" && window.state.turn === "O") {
-                setTimeout(ai, 800);
-            } else {
-                setTimeout(ask, 500);
-            }
-
-            if(check()) {
-                confetti(); showStatusModal(`ניצחון ל-${window.state.board[i]}!`);
+            if(checkWin()) {
+                confetti(); showStatusModal(`ניצחון ל-${window.state.turn}!`);
                 setTimeout(()=>location.reload(), 4000);
+            } else {
+                window.state.turn = window.state.turn === "X" ? "O" : "X";
+                if (window.mode === "online") await window.syncMove();
+                render();
             }
-        }
-
-        function ai() {
-            const empty = window.state.board.map((v,i) => v===""?i:null).filter(v=>v!==null);
-            if(empty.length) { window.state.canMove = true; cellTap(empty[Math.floor(Math.random()*empty.length)]); }
         }
 
         function render() {
             const isX = window.state.turn === 'X';
-            const label = document.getElementById('turnText');
-            label.textContent = `תור השחקן ${window.state.turn}`;
-            label.style.color = isX ? "#00f2ff" : "#bc13fe";
+            const icon = document.getElementById('turnIcon');
+            icon.textContent = isX ? "X" : "O";
+            icon.className = isX ? "x-neon" : "o-neon";
             
-            if (window.mode === "online") {
-                document.getElementById('subStatus').textContent = window.state.turn === window.myRole ? "התור שלך" : "ממתין ליריב...";
-            }
-
             document.querySelectorAll('.cell').forEach((c, i) => {
                 const val = window.state.board[i];
                 c.textContent = val === "X" ? "✕" : (val === "O" ? "◯" : "");
@@ -268,7 +262,7 @@
             });
         }
 
-        function check() {
+        function checkWin() {
             const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
             return wins.some(p => window.state.board[p[0]] && window.state.board[p[0]] === window.state.board[p[1]] && window.state.board[p[0]] === window.state.board[p[2]]);
         }
