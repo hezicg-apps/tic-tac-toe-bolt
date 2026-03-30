@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe - V2.0</title>
+    <title>Super Tic Tac Toe - V2.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -21,36 +21,61 @@
             appId: "1:32126067090:web:517e9f90515eec6e0d614b"
         };
         
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // אתחול Firebase עם בדיקת שגיאות
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase Init Error:", e);
+        }
 
         window.startOnline = async () => {
-            if (!window.vocab || window.vocab.length < 3) return showStatusModal("אנה הזן לפחות 3 מילים");
-            const id = Math.random().toString(36).substring(2, 7).toUpperCase();
-            window.gameId = id; window.myRole = "X"; window.mode = "online";
-            
-            await setDoc(doc(db, 'games', id), {
-                board: Array(9).fill(""), turn: "X", status: "waiting", 
-                vocabulary: window.vocab, history: {X:[], O:[]}, asking: false
-            });
-            
-            document.getElementById('gameLink').value = `${window.location.origin}${window.location.pathname}?game=${id}`;
-            document.getElementById('lobbyMain').style.display = 'none';
-            document.getElementById('onlineWait').style.display = 'flex';
-            document.getElementById('gameCodeText').textContent = id;
-            listenToGame();
+            const btn = document.getElementById('onlineBtn');
+            if (!window.vocab || window.vocab.length < 3) {
+                showStatusModal("נא להזין לפחות 3 מילים לפני תחילת המשחק");
+                return;
+            }
+
+            try {
+                btn.textContent = "מתחבר...";
+                btn.disabled = true;
+
+                const id = Math.random().toString(36).substring(2, 7).toUpperCase();
+                window.gameId = id; window.myRole = "X"; window.mode = "online";
+                
+                await setDoc(doc(db, 'games', id), {
+                    board: Array(9).fill(""), turn: "X", status: "waiting", 
+                    vocabulary: window.vocab, history: {X:[], O:[]}, asking: false
+                });
+                
+                const currentUrl = window.location.href.split('?')[0];
+                document.getElementById('gameLink').value = `${currentUrl}?game=${id}`;
+                document.getElementById('lobbyMain').style.display = 'none';
+                document.getElementById('onlineWait').style.display = 'flex';
+                document.getElementById('gameCodeText').textContent = id;
+                
+                listenToGame();
+            } catch (err) {
+                btn.textContent = "משחק אונליין (שלח לינק)";
+                btn.disabled = false;
+                showStatusModal("שגיאת תקשורת: וודא שיש אינטרנט ונסה שוב");
+                console.error("Game Creation Failed:", err);
+            }
         };
 
         window.joinGame = async (id) => {
             const cleanId = id?.trim().toUpperCase();
             if (!cleanId) return;
-            const snap = await getDoc(doc(db, 'games', cleanId));
-            if (snap.exists()) {
-                window.gameId = cleanId; window.myRole = "O"; window.mode = "online";
-                window.vocab = snap.data().vocabulary;
-                await updateDoc(doc(db, 'games', cleanId), { status: "playing" });
-                listenToGame();
-            } else { showStatusModal("קוד לא נמצא"); }
+            try {
+                const snap = await getDoc(doc(db, 'games', cleanId));
+                if (snap.exists()) {
+                    window.gameId = cleanId; window.myRole = "O"; window.mode = "online";
+                    window.vocab = snap.data().vocabulary;
+                    await updateDoc(doc(db, 'games', cleanId), { status: "playing" });
+                    listenToGame();
+                } else { showStatusModal("קוד משחק לא נמצא במערכת"); }
+            } catch (err) { showStatusModal("שגיאה בהתחברות למשחק"); }
         };
 
         function listenToGame() {
@@ -90,8 +115,8 @@
         .o-neon { color: #bc13fe; text-shadow: 0 0 15px #bc13fe; }
         .ghost { opacity: 0.2; animation: pulse 1s infinite; }
         @keyframes pulse { 50% { opacity: 0.05; } }
-        .btn { width: 280px; height: 55px; border-radius: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
-        .help-btn { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #00f2ff; color: #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; z-index: 50; }
+        .btn { width: 280px; height: 55px; border-radius: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; cursor: pointer; }
+        .help-btn { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #00f2ff; color: #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; z-index: 50; cursor: pointer; }
         .modal { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -105,10 +130,10 @@
             <h1 class="text-[#bc13fe] text-4xl font-black italic mb-12 tracking-tighter">TIC TAC TOE</h1>
             
             <button onclick="showModal('vocabModal')" class="btn border-2 border-[#facc15] text-[#facc15] text-lg">לחצו להוספת מילים למשחק</button>
-            <button onclick="startOnline()" class="btn bg-[#facc15] text-black text-lg">משחק אונליין (שלח לינק)</button>
+            <button id="onlineBtn" onclick="startOnline()" class="btn bg-[#facc15] text-black text-lg">משחק אונליין (שלח לינק)</button>
             
             <div class="mt-4 mb-2 text-zinc-600 text-sm">הקלידו קוד הצטרפות</div>
-            <input type="text" id="joinInput" class="btn bg-transparent border-2 border-zinc-800 text-center text-white focus:border-[#facc15] outline-none">
+            <input type="text" id="joinInput" class="btn bg-transparent border-2 border-zinc-800 text-center text-white outline-none focus:border-[#facc15]">
             <button onclick="joinGame(document.getElementById('joinInput').value)" class="btn border-2 border-zinc-800 text-zinc-500">הצטרף</button>
         </div>
 
@@ -124,28 +149,25 @@
         <div class="bg-zinc-900 p-8 rounded-[30px] border-2 border-[#00f2ff] w-full max-w-xs relative">
             <h2 class="text-[#00f2ff] text-2xl font-bold text-center mb-8">חוקי המשחק</h2>
             <div class="space-y-6 text-right" dir="rtl">
-                <p class="flex items-center gap-3"><span>🎯</span> <span>עונים על שאלה באנגלית כדי לקבל תור.</span></p>
-                <p class="flex items-center gap-3"><span>❌</span> <span>מותר רק 3 סימנים על הלוח לכל שחקן.</span></p>
-                <p class="flex items-center gap-3"><span>⚠️</span> <span>הסימן הרביעי ימחוק את הסימן הראשון שלך!</span></p>
-                <p class="flex items-center gap-3"><span>👻</span> <span>הסימן שעומד להיעלם יהיה חצי שקוף.</span></p>
+                <p>🎯 עונים על שאלה באנגלית כדי לקבל תור.</p>
+                <p>❌ מותר רק 3 סימנים על הלוח לכל שחקן.</p>
+                <p>⚠️ הסימן הרביעי ימחוק את הסימן הישן שלך!</p>
             </div>
-            <button onclick="hideModal('helpModal')" class="mt-10 bg-[#facc15] text-black font-bold py-4 rounded-2xl w-full text-lg">הבנתי!</button>
+            <button onclick="hideModal('helpModal')" class="mt-10 bg-[#facc15] text-black font-bold py-4 rounded-2xl w-full">הבנתי!</button>
         </div>
     </div>
 
     <div id="vocabModal" style="display:none;" class="modal bg-black/95">
         <div class="bg-zinc-900 p-6 rounded-[30px] border-2 border-[#facc15] w-80">
             <h2 class="text-[#facc15] text-xl font-bold text-center mb-4">הזנת מילים למשחק</h2>
-            <textarea id="vIn" placeholder="apple - תפוח" class="w-full h-48 bg-black text-white p-4 rounded-2xl border border-zinc-800 text-right mb-4 outline-none focus:border-[#facc15]"></textarea>
-            <button onclick="saveVocab()" class="btn bg-[#facc15] text-black w-full mb-0">שמור מילים</button>
+            <textarea id="vIn" placeholder="dog - כלב" class="w-full h-48 bg-black text-white p-4 rounded-2xl border border-zinc-800 text-right mb-4 outline-none"></textarea>
+            <button onclick="saveVocab()" class="btn bg-[#facc15] text-black w-full">שמור מילים</button>
         </div>
     </div>
 
     <div id="gameUI" style="display:none;" class="flex flex-col h-full">
         <div class="h-24 flex items-center justify-center border-b border-zinc-900">
-            <h2 id="turnText" class="text-3xl font-black italic flex items-center gap-3">
-                תור השחקן <span id="turnIcon"></span>
-            </h2>
+            <h2 id="turnText" class="text-3xl font-black italic">תור השחקן <span id="turnIcon"></span></h2>
         </div>
         <div class="flex-grow flex items-center justify-center">
             <div class="board">
@@ -164,7 +186,7 @@
     <div id="statusModal" style="display:none;" class="modal bg-black/90">
         <div class="bg-zinc-900 p-8 rounded-3xl text-center">
             <p id="statusMsg" class="text-xl mb-6"></p>
-            <button onclick="hideModal('statusModal')" class="btn bg-[#facc15] text-black">אישור</button>
+            <button onclick="hideModal('statusModal')" class="btn bg-[#facc15] text-black w-full">אישור</button>
         </div>
     </div>
 
@@ -178,7 +200,8 @@
         const showStatusModal = (msg) => { document.getElementById('statusMsg').textContent = msg; showModal('statusModal'); };
 
         function saveVocab() {
-            window.vocab = document.getElementById('vIn').value.split('\n').map(l => {
+            const raw = document.getElementById('vIn').value;
+            window.vocab = raw.split('\n').map(l => {
                 const p = l.split('-');
                 return p.length === 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
@@ -186,7 +209,9 @@
         }
 
         function copyLink() {
-            const el = document.getElementById('gameLink'); el.select(); document.execCommand('copy');
+            const el = document.getElementById('gameLink');
+            el.select();
+            document.execCommand('copy');
             showStatusModal("הקישור הועתק!");
         }
 
