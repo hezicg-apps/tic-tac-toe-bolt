@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Tic Tac Toe</title>
+    <title>Tic Tac Toe Bolt v. 3.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body, html { 
-            background: #1a7b4e; 
-            color: #000; font-family: 'Varela Round', sans-serif; 
-            margin: 0; padding: 0; height: 100%; width: 100%;
-            overflow: hidden;
+            background: #000; 
+            color: #fff; 
+            font-family: 'Varela Round', sans-serif; 
+            margin: 0; padding: 0; 
+            height: 100%; 
+            width: 100%;
+            overflow: hidden; 
+            position: fixed; 
         }
         
-        /* תפריט ראשי גמיש למניעת חפיפות */
+        /* סידור הלובי למניעת חפיפת פוטר */
         #lobby { 
             display: flex; 
             flex-direction: column; 
@@ -23,7 +27,7 @@
             justify-content: space-between; 
             text-align: center;
             height: 100%;
-            padding: 40px 20px 20px 20px;
+            padding: 20px;
         }
 
         .lobby-content {
@@ -34,312 +38,181 @@
             justify-content: center;
             width: 100%;
         }
-        
-        /* כותרת בבלוק אחיד */
-        .title-container {
-            width: 280px;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 2.5rem;
-            position: relative;
-        }
-        
-        /* כפתור עזרה - מוזז למעלה כדי לא להפריע לטקסט */
-        .help-trigger {
-            position: absolute;
-            top: -45px;
-            left: 0;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-        }
 
-        .title-super {
-            font-size: 3.8rem;
-            font-weight: 900;
-            font-style: italic;
-            line-height: 0.9;
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .title-ttt {
-            font-size: 2.1rem;
-            font-weight: 900;
-            font-style: italic;
-            line-height: 1;
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        /* כפתורים */
-        .btn-main { 
-            width: 280px; 
-            min-height: 55px; 
+        .logo-container { 
+            margin-bottom: 40px; 
             display: flex; 
+            flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
-            border-radius: 12px; 
-            font-weight: 900; 
-            margin-bottom: 12px; 
-            border: 3px solid #000; 
-            cursor: pointer; 
-            background: #fff; 
-            transition: transform 0.1s;
-            padding: 5px 15px;
-            font-size: 1.1rem;
-        }
-        .btn-main:active { transform: scale(0.95); }
-
-        /* לוח משחק */
-        .super-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            padding: 4px;
-            background: #000;
-            border: 4px solid #000;
-            border-radius: 4px;
-            width: 90vw;
-            max-width: 350px;
-            aspect-ratio: 1 / 1;
-            margin: 10px auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
         }
 
-        .mini-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            background: #fff;
-            border: 1px solid #000;
-            position: relative;
-        }
+        .bolt-text { margin-bottom: 15px; }
 
-        .cell {
-            background: #fff;
-            border: 0.5px solid #ccc;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: 900;
-            cursor: pointer;
-            line-height: 1;
-        }
+        .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
+        
+        #statusHeader { margin-top: 60px; margin-bottom: 30px; }
+        .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; z-index: 100; cursor: pointer; color: #444; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
 
-        .active-mini {
-            background: #fff9c4;
-            box-shadow: inset 0 0 10px rgba(251, 192, 45, 0.5);
-            outline: 3px solid #fbc02d;
-            z-index: 50;
+        .board { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            width: 320px; height: 320px; position: relative; margin-bottom: 30px;
         }
-
-        .x-sign { color: #1976d2; }
-        .o-sign { color: #d32f2f; }
-
-        .mini-win {
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 6.5rem; z-index: 20;
-            background: rgba(255,255,255,0.9);
-            font-weight: 900;
-        }
-
-        /* מודאלים */
-        .modal { 
-            position: fixed; inset: 0; 
-            background: rgba(26, 123, 78, 0.98); 
-            z-index: 2000; display: none; flex-direction: column; 
-            align-items: center; justify-content: center; padding: 20px; 
-        }
+        .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
+        .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 106px 0 0 #fff, 0 0 10px #fff, 106px 0 10px #fff; }
+        .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 106px 0 #fff, 0 0 10px #fff, 0 106px 10px #fff; }
+        
+        .cell { display: flex; align-items: center; justify-content: center; font-size: 6rem; font-weight: 900; width: 106px; height: 106px; cursor: pointer; z-index: 10; line-height: 1; }
+        .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
+        .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; -webkit-text-stroke: 1px rgba(255,255,255,0.5); }
+        .ghost { opacity: 0.25; filter: blur(2px); }
+        
+        .btn-main { width: 280px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; margin-bottom: 12px; border: 2px solid; cursor: pointer; background: transparent; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         
         .glow-q-btn {
-            width: 70px; height: 70px; border-radius: 50%;
-            background: #fff; border: 4px solid #000;
-            font-size: 2.8rem; font-weight: 900;
+            width: 85px; height: 85px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05); border: 5px solid #facc15;
+            color: #facc15; font-size: 4rem; font-weight: 900;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin-bottom: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: 0.3s;
+            cursor: pointer; animation: question-pulse 2s infinite;
         }
+        .q-turn-x { border-color: #00f2ff; color: #00f2ff; box-shadow: 0 0 20px #00f2ff; }
+        .q-turn-o { border-color: #bc13fe; color: #bc13fe; box-shadow: 0 0 20px #bc13fe; }
         
-        .q-x { color: #1976d2; border-color: #1976d2; }
-        .q-o { color: #d32f2f; border-color: #d32f2f; }
+        @keyframes question-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-        #statusHeader { 
-            font-size: 3rem; 
-            font-weight: 900; 
-            margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
-        }
+        .option-btn { width: 100%; border-radius: 20px; border: 2px solid #27272a; font-size: 1.4rem; font-weight: 800; transition: 0.3s; background: transparent; color: white; padding: 12px; }
+        .correct-anim { border-color: #22c55e !important; background: rgba(34, 197, 94, 0.2) !important; box-shadow: 0 0 20px #22c55e; }
+        .wrong-anim { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.2) !important; box-shadow: 0 0 20px #ef4444; }
+        
+        .help-btn { position: absolute; top: 15px; left: 15px; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #facc15; color: #facc15; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        .timer-bar { position: fixed; top: 0; left: 0; height: 8px; background: #facc15; width: 0%; z-index: 3000; box-shadow: 0 0 15px #facc15; transition: width 0.1s linear; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        /* Footer משופר שלא נדבק לכפתורים */
         .footer {
             width: 100%;
-            padding: 10px 0;
-            font-size: 0.75rem; 
-            font-weight: bold; 
-            color: rgba(255,255,255,0.7);
+            padding: 15px 0;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
             text-align: center;
         }
-
-        .back-btn { position: absolute; top: 15px; right: 15px; font-size: 2rem; cursor: pointer; color: #fff; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <!-- מסך פתיחה -->
+    <div id="speedTimer" class="timer-bar"></div>
+
     <div id="lobby">
+        <div onclick="showModal('helpModal')" class="help-btn">?</div>
+        
         <div class="lobby-content">
-            <div class="title-container">
-                <div class="help-trigger" onclick="alert('הסבר: עליך לנצח בלוחות קטנים כדי לסמן X או O בלוח הגדול. המהלך שלך קובע באיזה לוח היריב ישחק בשלב הבא!')">?</div>
-                <div class="title-super text-white">
-                    <span>S</span><span>U</span><span>P</span><span>E</span><span>R</span>
-                </div>
-                <div class="title-ttt text-white">
-                    <span>TIC</span><span>TAC</span><span>TOE</span>
-                </div>
+            <div class="logo-container">
+                <h1 class="text-[#00f2ff] text-4xl font-black italic mb-1">TIC TAC TOE</h1>
+                <h1 class="text-[#facc15] text-8xl font-black italic bolt-text" style="text-shadow: 0 0 30px #facc15;">BOLT</h1>
+                <div class="text-5xl">⚡</div>
             </div>
             
-            <button onclick="showModal('vocabModal')" class="btn-main">הכנסת מילים / ייבוא</button>
-            <button onclick="startGame('pvp')" class="btn-main text-blue-600">שחקן נגד שחקן</button>
-            <button onclick="startGame('pvc')" class="btn-main text-red-600">שחקן נגד מחשב</button>
+            <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
+            <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
+            <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
+            <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
         </div>
-        
-        <div class="footer">Super Tic Tac Toe Bolt © פיתוח חזי כהן גלמן 2026</div>
+
+        <div class="footer">Tic Tac Toe Bolt © פיתוח חזי כהן גלמן 2026</div>
     </div>
 
-    <!-- ממשק משחק -->
-    <div id="gameUI" class="hidden flex-col items-center justify-between h-full py-8">
+    <div id="gameUI" class="hidden flex-col items-center h-full">
         <div onclick="location.reload()" class="back-btn">➔</div>
-        
-        <div id="quizTrigger" onclick="showQuiz()" class="glow-q-btn hidden">?</div>
-
-        <div id="superBoard" class="super-board"></div>
-
-        <div id="statusHeader" class="text-center">תור X</div>
+        <div id="statusHeader" class="text-5xl font-black italic"></div>
+        <div class="game-wrapper">
+            <div id="mainBoard" class="board"></div>
+            <div id="nextQuestionBtn" onclick="showQuiz()" class="glow-q-btn hidden">?</div>
+        </div>
     </div>
 
-    <!-- מודאל שאלה -->
     <div id="quizModal" class="modal">
-        <div id="qText" class="text-white text-5xl font-black mb-12 italic text-center"></div>
+        <div id="qText" class="text-6xl font-black mb-12 italic text-center" style="direction: ltr;"></div>
         <div id="qOptions" class="flex flex-col gap-4 w-72"></div>
     </div>
 
-    <!-- מודאל מילים -->
+    <div id="helpModal" class="modal">
+        <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-[#facc15] max-w-sm text-center">
+            <h2 class="text-[#facc15] text-2xl font-black mb-4">איך משחקים?</h2>
+            <ul class="text-right text-lg space-y-4 mb-8 text-white">
+                <li>⚡ <b>רק 3 סימנים:</b> בסימן ה-4, הראשון נעלם!</li>
+                <li>⚡ <b>Speed Run:</b> יש לכם 5 שניות לענות על שאלה!</li>
+                <li>⚡ <b>לייזרים:</b> נצחו בשאלות כדי לקבל את הזכות לזוז.</li>
+            </ul>
+            <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
+        </div>
+    </div>
+
+    <div id="aiDifficultyModal" class="modal">
+        <h2 class="text-white text-3xl font-black mb-8 italic">רמת קושי</h2>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'easy')" class="btn-main border-[#00f2ff] text-[#00f2ff]">קל</button>
+        <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
+    </div>
+
     <div id="vocabModal" class="modal">
-        <div onclick="hideModal('vocabModal')" class="back-btn">➔</div>
-        <h2 class="text-white text-2xl font-black mb-4 text-center">הכנסת רשימת מילים</h2>
-        <textarea id="vIn" oninput="localStorage.setItem('sttt_vocab', this.value)" placeholder="apple - תפוח" class="w-80 h-64 bg-white border-2 border-black text-black p-4 rounded-xl mb-4 text-right outline-none"></textarea>
-        <button onclick="hideModal('vocabModal')" class="btn-main bg-black text-white border-none">שמור וחזור</button>
+        <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">רשימת מילים</h2>
+        <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-80 h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none focus:border-[#facc15]"></textarea>
+        <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור</button>
+    </div>
+
+    <div id="winModal" class="modal text-center">
+        <h2 id="winTitle" class="text-6xl font-black mb-6"></h2>
+        <div id="winnerIcon" class="text-9xl mb-10"></div>
+        <button onclick="location.reload()" class="btn-main border-[#facc15] text-[#facc15]">משחק חדש</button>
     </div>
 
     <script>
-        let vocab = [], turn = "X", activeBoard = -1, canMove = false, gameMode = 'pvp';
-        let superData = Array(9).fill(null).map(() => Array(9).fill(""));
-        let miniWinners = Array(9).fill("");
+        let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
+        let timeLeft = 100, speedInterval;
 
         window.onload = () => {
-            const saved = localStorage.getItem('sttt_vocab');
+            const saved = localStorage.getItem('ttt_vocab');
             if(saved) document.getElementById('vIn').value = saved;
         };
 
-        const showModal = id => {
-            const m = document.getElementById(id);
-            m.style.display = 'flex';
-        };
+        const showModal = id => document.getElementById(id).style.display = 'flex';
         const hideModal = id => document.getElementById(id).style.display = 'none';
 
-        function startGame(mode) {
+        function parseVocab() {
             const raw = document.getElementById('vIn').value;
             vocab = raw.split('\n').map(l => {
                 const p = l.split(/[–\-\—:]/);
                 return p.length >= 2 ? { en: p[0].trim(), he: p[1].trim() } : null;
             }).filter(x => x);
-            
-            if(vocab.length < 2) { 
-                alert("נא להכניס לפחות 2 מילים בפורמט: מילה - תרגום"); 
-                return; 
-            }
-            
-            gameMode = mode;
+            return vocab.length >= 2;
+        }
+
+        function startGame(mode, diff = 'hard') {
+            if(!parseVocab()) { alert("נא להכניס מילים."); return; }
+            gameMode = mode; difficulty = diff;
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('gameUI').classList.replace('hidden', 'flex');
-            createBoards();
-            updateStatus();
-            document.getElementById('quizTrigger').classList.remove('hidden');
+            initBoard(); startTurn();
         }
 
-        function createBoards() {
-            const container = document.getElementById('superBoard');
-            container.innerHTML = '';
-            for(let b=0; b<9; b++) {
-                const mini = document.createElement('div');
-                mini.id = `mini-${b}`;
-                mini.className = 'mini-board';
-                for(let c=0; c<9; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.onclick = () => handleCellClick(b, c);
-                    mini.appendChild(cell);
-                }
-                container.appendChild(mini);
+        function initBoard() {
+            const b = document.getElementById('mainBoard'); b.innerHTML = '';
+            for(let i=0; i<9; i++) {
+                const c = document.createElement('div'); c.className = 'cell';
+                c.onclick = () => { if(canMove && !isGameOver) makeMove(i); };
+                b.appendChild(c);
             }
-            updateActiveHighlight();
         }
 
-        function handleCellClick(boardIdx, cellIdx) {
-            if(!canMove || miniWinners[boardIdx] !== "") return;
-            if(activeBoard !== -1 && activeBoard !== boardIdx) return;
-            if(superData[boardIdx][cellIdx] !== "") return;
-            executeMove(boardIdx, cellIdx);
-        }
-
-        function executeMove(boardIdx, cellIdx) {
-            superData[boardIdx][cellIdx] = turn;
-            canMove = false;
-            checkMiniWin(boardIdx);
-            
-            if(miniWinners[cellIdx] === "" && superData[cellIdx].some(c => c === "")) {
-                activeBoard = cellIdx;
-            } else {
-                activeBoard = -1;
-            }
-
-            render();
-            
-            if(checkSuperWin()) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                setTimeout(() => { alert("ניצחון מוחץ ל-" + turn + "!"); location.reload(); }, 500);
-                return;
-            }
-
-            turn = turn === "X" ? "O" : "X";
-            updateStatus();
-            if(gameMode === 'pvc' && turn === 'O') setTimeout(aiMove, 600);
-            else document.getElementById('quizTrigger').classList.remove('hidden');
-        }
-
-        function aiMove() {
-            let possibleBoards = activeBoard === -1 ? 
-                miniWinners.map((w, i) => w === "" ? i : null).filter(v => v !== null) : 
-                [activeBoard];
-            let b = possibleBoards[Math.floor(Math.random() * possibleBoards.length)];
-            let possibleCells = superData[b].map((v, i) => v === "" ? i : null).filter(v => v !== null);
-            let c = possibleCells[Math.floor(Math.random() * possibleCells.length)];
-            executeMove(b, c);
+        function startTurn() {
+            if(isGameOver) return;
+            const btn = document.getElementById('nextQuestionBtn');
+            const cls = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
+            document.getElementById('statusHeader').innerHTML = `<span class="${cls}">תור ${turn}</span>`;
+            btn.className = `glow-q-btn ${turn === 'X' ? 'q-turn-x' : 'q-turn-o'}`;
+            btn.classList.remove('hidden');
+            if(gameMode === 'pvc' && turn === 'O') setTimeout(aiAction, 800);
         }
 
         function showQuiz() {
@@ -350,76 +223,116 @@
                 if(!opts.includes(r)) opts.push(r);
             }
             opts.sort(() => Math.random() - 0.5);
-            
-            document.getElementById('qText').textContent = item.en;
+            const qT = document.getElementById('qText');
+            qT.textContent = item.en;
+            qT.className = `text-6xl font-black mb-12 italic text-center ${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}`;
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'btn-main border-black w-full';
+                btn.className = 'option-btn';
                 btn.textContent = o;
-                btn.onclick = () => {
-                    if(o === item.he) {
-                        hideModal('quizModal');
-                        canMove = true;
-                        document.getElementById('quizTrigger').classList.add('hidden');
-                        updateActiveHighlight();
-                    } else {
-                        hideModal('quizModal');
-                        turn = turn === "X" ? "O" : "X";
-                        updateStatus();
-                        if(gameMode === 'pvc' && turn === 'O') setTimeout(aiMove, 600);
-                    }
-                };
+                btn.onclick = () => handleAnswer(o === item.he, btn, item.he);
                 container.appendChild(btn);
             });
             showModal('quizModal');
+            if(gameMode === 'speed') startTimer();
         }
 
-        function checkMiniWin(bIdx) {
-            if(checkCombo(superData[bIdx], turn)) miniWinners[bIdx] = turn;
+        function startTimer() {
+            timeLeft = 100;
+            document.getElementById('speedTimer').style.width = "100%";
+            clearInterval(speedInterval);
+            speedInterval = setInterval(() => {
+                timeLeft -= 2;
+                document.getElementById('speedTimer').style.width = timeLeft + "%";
+                if(timeLeft <= 0) {
+                    clearInterval(speedInterval);
+                    handleAnswer(false, null, "");
+                }
+            }, 100);
         }
 
-        function checkSuperWin() { return checkCombo(miniWinners, turn); }
-
-        function checkCombo(arr, p) {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(s => s.every(i => arr[i] === p));
+        function handleAnswer(isCorrect, clickedBtn, correctHe) {
+            clearInterval(speedInterval);
+            document.getElementById('speedTimer').style.width = "0%";
+            const btns = document.querySelectorAll('.option-btn');
+            
+            if(isCorrect) {
+                if(clickedBtn) clickedBtn.classList.add('correct-anim');
+                setTimeout(() => { hideModal('quizModal'); canMove = true; }, 600);
+            } else {
+                if(clickedBtn) clickedBtn.classList.add('wrong-anim');
+                btns.forEach(b => { if(b.textContent === correctHe) b.classList.add('correct-anim'); });
+                document.getElementById('quizModal').classList.add('shake');
+                setTimeout(() => { 
+                    hideModal('quizModal'); 
+                    document.getElementById('quizModal').classList.remove('shake');
+                    switchTurn(); 
+                }, 1400);
+            }
         }
+
+        function makeMove(i) {
+            if(board[i] !== "") return;
+            board[i] = turn; history[turn].push(i);
+            if(checkWin(board, turn)) { isGameOver = true; render(); triggerWin(); return; }
+            if(history[turn].length > 3) board[history[turn].shift()] = "";
+            render(); canMove = false; switchTurn();
+        }
+
+        function triggerWin() {
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            const title = document.getElementById('winTitle');
+            title.textContent = `ניצחון ל-${turn}!`;
+            title.className = `text-6xl font-black mb-6 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            document.getElementById('winnerIcon').textContent = turn === 'X' ? '✕' : '◯';
+            document.getElementById('winnerIcon').className = `text-9xl mb-10 ${turn==='X'?'x-lightsaber':'o-lightsaber'}`;
+            setTimeout(() => showModal('winModal'), 600);
+        }
+
+        function switchTurn() { turn = turn === "X" ? "O" : "X"; render(); startTurn(); }
 
         function render() {
-            for(let b=0; b<9; b++) {
-                const mini = document.getElementById(`mini-${b}`);
-                const cells = mini.querySelectorAll('.cell');
-                superData[b].forEach((val, cIdx) => {
-                    cells[cIdx].textContent = val === 'X' ? '✕' : (val === 'O' ? '◯' : '');
-                    cells[cIdx].className = 'cell ' + (val === 'X' ? 'x-sign' : (val === 'O' ? 'o-sign' : ''));
-                });
-                if(miniWinners[b] !== "" && !mini.querySelector('.mini-win')) {
-                    const winOverlay = document.createElement('div');
-                    winOverlay.className = 'mini-win ' + (miniWinners[b] === 'X' ? 'x-sign' : 'o-sign');
-                    winOverlay.textContent = miniWinners[b] === 'X' ? '✕' : '◯';
-                    mini.appendChild(winOverlay);
-                }
-            }
-            updateActiveHighlight();
+            document.querySelectorAll('.cell').forEach((c, i) => {
+                const v = board[i]; c.textContent = v === "X" ? "✕" : (v === "O" ? "◯" : "");
+                c.className = "cell " + (v === "X" ? "x-lightsaber" : (v === "O" ? "o-lightsaber" : ""));
+                if(v && !isGameOver && history[v].length === 3 && history[v][0] === i) c.classList.add('ghost');
+            });
         }
 
-        function updateActiveHighlight() {
-            for(let b=0; b<9; b++) {
-                const mini = document.getElementById(`mini-${b}`);
-                mini.classList.remove('active-mini');
-                if(canMove && (activeBoard === -1 || activeBoard === b) && miniWinners[b] === "") {
-                    mini.classList.add('active-mini');
-                }
-            }
+        function checkWin(b, p) {
+            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return w.some(pats => pats.every(idx => b[idx] === p));
         }
 
-        function updateStatus() {
-            const h = document.getElementById('statusHeader');
-            const q = document.getElementById('quizTrigger');
-            h.textContent = `תור ${turn}`;
-            h.className = turn === 'X' ? 'x-sign' : 'o-sign';
-            q.className = `glow-q-btn ${turn === 'X' ? 'q-x' : 'q-o'}`;
+        function aiAction() {
+            let m;
+            if(difficulty === 'easy') {
+                const av = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+                m = av[Math.floor(Math.random()*av.length)];
+            } else {
+                let bestS = -Infinity;
+                for(let i=0; i<9; i++) {
+                    if(board[i] === "") {
+                        board[i] = "O"; let s = minimax(board, 0, false); board[i] = "";
+                        if(s > bestS) { bestS = s; m = i; }
+                    }
+                }
+            }
+            if(m !== undefined) makeMove(m);
+        }
+
+        function minimax(b, d, isMax) {
+            if(checkWin(b, "O")) return 10; if(checkWin(b, "X")) return -10; if(d > 4) return 0;
+            let best = isMax ? -Infinity : Infinity;
+            for(let i=0; i<9; i++) {
+                if(b[i] === "") {
+                    b[i] = isMax ? "O" : "X";
+                    let s = minimax(b, d+1, !isMax);
+                    b[i] = ""; best = isMax ? Math.max(best, s) : Math.min(best, s);
+                }
+            }
+            return best;
         }
     </script>
 </body>
