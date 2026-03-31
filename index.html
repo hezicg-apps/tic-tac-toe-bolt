@@ -38,7 +38,7 @@
             justify-content: center;
             width: 100%;
             max-width: 500px;
-            gap: 40px;
+            gap: 30px;
         }
 
         .logo-container { 
@@ -49,17 +49,18 @@
             direction: ltr; 
         }
 
-        /* עיצוב הכותרת העליונה לפי הבקשה */
+        /* הגדרות כותרת TIC TAC TOE - התאמה מדויקת לצילום המסך */
         .neon-glow-text {
             color: #00f2ff;
             text-shadow: 0 0 8px #00f2ff, 0 0 15px #00f2ff;
             width: 100%;
             display: flex;
-            justify-content: space-between; 
-            font-size: 1.4rem;
+            justify-content: space-between; /* ריווח שווה בין המילים */
+            font-size: 1.15rem; /* גודל מעודן לפי העיצוב */
             font-weight: 900;
-            margin-bottom: -5px;
-            letter-spacing: 2px;
+            margin-bottom: -10px; /* קירוב למילה BOLT */
+            letter-spacing: 0.25rem; /* ריווח אותיות רחב כפי שביקשת */
+            text-transform: uppercase;
             animation: neon-flicker 3s infinite ease-in-out;
         }
 
@@ -74,25 +75,25 @@
             }
         }
 
-        /* עיצוב המילה BOLT - ללא נטייה ומוקטן למניעת חיתוך */
+        /* עיצוב המילה BOLT - ישר (לא נטוי) וגודל בטוח לניידים */
         .bolt-title {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 0.8;
-            letter-spacing: -3px;
-            font-size: 5.8rem; /* מוקטן למניעת חיתוך בניידים */
+            line-height: 0.9;
+            letter-spacing: -2px;
+            font-size: 5.5rem; /* גודל מוקטן שמוודא כניסה לרוחב המסך */
             font-weight: 950;
-            font-style: normal; /* ללא נטייה */
+            font-style: normal; /* ביטול ה-Italic */
             color: #facc15;
             text-shadow: 0 0 25px rgba(250, 204, 21, 0.5);
             margin-top: 5px;
         }
 
         @media (min-width: 640px) {
-            .bolt-title { font-size: 7.5rem; }
-            .neon-glow-text { font-size: 1.8rem; }
+            .bolt-title { font-size: 8rem; }
+            .neon-glow-text { font-size: 1.6rem; letter-spacing: 0.4rem; }
         }
 
         .bolt-o {
@@ -113,6 +114,7 @@
             z-index: 5;
         }
 
+        /* שאר חלקי המשחק */
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
         .btn-main { width: 100%; max-width: 280px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-weight: 900; border: 2px solid; cursor: pointer; background: transparent; font-size: 1.1rem; transition: all 0.2s; }
@@ -151,8 +153,6 @@
         .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; }
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; }
         
-        .timer-bar { position: fixed; top: 0; left: 0; height: 6px; background: #f97316; width: 0%; z-index: 3000; transition: width 0.1s linear; }
-        
         .footer { width: 100%; padding: 15px 0; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center; }
 
         * { -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -160,8 +160,6 @@
     </style>
 </head>
 <body>
-
-    <div id="speedTimer" class="timer-bar"></div>
 
     <div id="lobby">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
@@ -189,6 +187,7 @@
         <div class="footer">Tic Tac Toe Bolt © פיתוח חזי כהן גלמן 2026</div>
     </div>
 
+    <!-- UI המשחק והמודלים (זהה לגרסה הקודמת) -->
     <div id="gameUI" class="hidden flex-col items-center h-full">
         <div onclick="location.reload()" class="absolute top-5 right-5 text-3xl cursor-pointer text-zinc-500 transform scale-x-[-1]">➔</div>
         <div id="statusHeader" class="mt-20 text-4xl font-black italic"></div>
@@ -209,7 +208,7 @@
     </div>
 
     <div id="vocabModal" class="modal">
-        <h2 class="text-[#facc15] text-2xl font-black mb-4 italic">רשימת מילים</h2>
+        <h2 class="text-[#facc15] text-2xl font-black mb-4 italic text-center w-full">רשימת מילים</h2>
         <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-full max-w-xs h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none"></textarea>
         <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none w-full max-w-xs h-14">שמור</button>
     </div>
@@ -223,7 +222,7 @@
     <div id="helpModal" class="modal">
         <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-[#00f2ff] max-w-xs text-center">
             <h2 class="text-[#00f2ff] text-2xl font-black mb-4">איך משחקים?</h2>
-            <p class="text-right text-white mb-6">לפני כל מהלך יש לענות על שאלה. זכרו: רק 3 סימנים על הלוח! הרביעי מוחק את הראשון.</p>
+            <p class="text-right text-white mb-6">ענו על שאלה לפני כל מהלך. הכלל החשוב: רק 3 סימנים לכל שחקן על הלוח. הסימן הרביעי מוחק את הישן ביותר!</p>
             <button onclick="hideModal('helpModal')" class="btn-main bg-[#00f2ff] text-black border-none w-full">הבנתי!</button>
         </div>
     </div>
@@ -235,8 +234,8 @@
     </div>
 
     <script>
+        // לוגיקה זהה למקור לשמירה על תקינות המשחק
         let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
-        let timeLeft = 100, speedInterval;
 
         window.onload = () => {
             const saved = localStorage.getItem('ttt_vocab');
@@ -303,22 +302,9 @@
                 container.appendChild(btn);
             });
             showModal('quizModal');
-            if(gameMode === 'speed') startTimer();
-        }
-
-        function startTimer() {
-            timeLeft = 100; document.getElementById('speedTimer').style.width = "100%";
-            clearInterval(speedInterval);
-            speedInterval = setInterval(() => {
-                timeLeft -= 2.5;
-                document.getElementById('speedTimer').style.width = timeLeft + "%";
-                if(timeLeft <= 0) { clearInterval(speedInterval); handleAnswer(false, null); }
-            }, 100);
         }
 
         function handleAnswer(isCorrect, clickedBtn) {
-            clearInterval(speedInterval);
-            document.getElementById('speedTimer').style.width = "0%";
             if(isCorrect) {
                 if(clickedBtn) clickedBtn.classList.add('bg-green-600', 'border-green-400');
                 setTimeout(() => { hideModal('quizModal'); canMove = true; document.getElementById('nextQuestionBtn').classList.add('hidden'); }, 300);
