@@ -37,7 +37,7 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 400px; /* שומר על סידור קבוע גם במסכים רחבים */
+            max-width: 400px;
             gap: 20px;
         }
 
@@ -46,9 +46,10 @@
             flex-direction: column; 
             align-items: center; 
             width: 100%;
+            /* הבטחת כיוון כתיבה משמאל לימין לאנגלית */
+            direction: ltr; 
         }
 
-        /* עיצוב הברק בתוך ה-O - מקובע */
         .bolt-title {
             position: relative;
             display: flex;
@@ -69,7 +70,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-45%, -50%); /* כיוון עדין למרכז ה-O */
+            transform: translate(-45%, -50%);
             font-size: 0.45em; 
             color: #ff9d00;
             text-shadow: 0 0 15px #ff9d00;
@@ -87,11 +88,7 @@
             width: 85vw; height: 85vw; max-width: 320px; max-height: 320px; 
             position: relative;
         }
-        .board::before, .board::after { content: ''; position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 0 10px #fff; }
-        .board::before { width: 5px; height: 100%; left: 33.33%; box-shadow: calc(33.33vw) 0 0 #fff; } /* תיקון רספונסיבי */
-        .board::after { height: 5px; width: 100%; top: 33.33%; box-shadow: 0 calc(33.33vw) 0 #fff; }
-
-        /* במקום box-shadow קשיח, נשתמש בקווים אמיתיים למניעת עיוות */
+        
         .grid-line-v { position: absolute; background: #fff; width: 5px; height: 100%; top: 0; border-radius: 10px; box-shadow: 0 0 10px #fff; }
         .grid-line-h { position: absolute; background: #fff; height: 5px; width: 100%; left: 0; border-radius: 10px; box-shadow: 0 0 10px #fff; }
         
@@ -120,9 +117,36 @@
             font-size: 0.7rem;
             color: rgba(255,255,255,0.4);
             text-align: center;
+            direction: rtl;
         }
 
-        /* מניעת בחירת טקסט */
+        .help-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .timer-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: #f97316;
+            width: 0%;
+            z-index: 3000;
+            transition: width 0.1s linear;
+        }
+
         * { -webkit-tap-highlight-color: transparent; user-select: none; }
     </style>
 </head>
@@ -134,7 +158,8 @@
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
         
         <div class="lobby-content">
-            <div class="logo-container">
+            <!-- כפיית LTR על הלוגו כדי למנוע היפוך אותיות -->
+            <div class="logo-container" dir="ltr">
                 <h1 class="text-[#00f2ff] text-5xl sm:text-6xl font-black italic tracking-tighter mb-0">TIC TAC TOE</h1>
                 <div class="bolt-title text-[#facc15] text-8xl sm:text-9xl font-black italic" style="text-shadow: 0 0 25px rgba(250, 204, 21, 0.4);">
                     B<span class="bolt-o">O<span class="lightning-icon">⚡</span></span>LT
@@ -157,7 +182,6 @@
         <div id="statusHeader" class="text-4xl font-black italic"></div>
         <div class="game-wrapper">
             <div id="mainBoard" class="board">
-                <!-- קווי הלוח מוטמעים ישירות למניעת עיוות -->
                 <div class="grid-line-v" style="left: 33.33%;"></div>
                 <div class="grid-line-v" style="left: 66.66%;"></div>
                 <div class="grid-line-h" style="top: 33.33%;"></div>
@@ -167,9 +191,8 @@
         </div>
     </div>
 
-    <!-- מודאלים נשארים אותו דבר אך עם עיצוב רספונסיבי משופר -->
     <div id="quizModal" class="modal">
-        <div id="qText" class="text-5xl font-black mb-8 italic text-center" style="direction: ltr;"></div>
+        <div id="qText" class="text-5xl font-black mb-8 italic text-center" dir="ltr"></div>
         <div id="qOptions" class="flex flex-col gap-3 w-full max-w-xs"></div>
     </div>
 
@@ -204,7 +227,6 @@
     </div>
 
     <script>
-        // לוגיקת המשחק נשארת זהה כדי לשמור על הפונקציונליות
         let vocab = [], gameMode = 'pvp', difficulty = 'hard', board = Array(9).fill(""), history = {X:[], O:[]}, turn = "X", canMove = false, isGameOver = false;
         let timeLeft = 100, speedInterval;
 
@@ -235,7 +257,6 @@
 
         function initBoard() {
             const b = document.getElementById('mainBoard');
-            // ניקוי תאים קודמים מבלי למחוק את הקווים
             const existingCells = b.querySelectorAll('.cell');
             existingCells.forEach(c => c.remove());
             
@@ -251,7 +272,6 @@
             const btn = document.getElementById('nextQuestionBtn');
             const cls = turn === 'X' ? 'x-lightsaber' : 'o-lightsaber';
             document.getElementById('statusHeader').innerHTML = `<span class="${cls}">תור ${turn}</span>`;
-            btn.className = `glow-q-btn ${turn === 'X' ? 'q-turn-x' : 'q-turn-o'}`;
             btn.classList.remove('hidden');
             if(gameMode === 'pvc' && turn === 'O') setTimeout(aiAction, 800);
         }
@@ -270,7 +290,7 @@
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn border-2 border-zinc-800 p-3 rounded-2xl font-bold text-lg';
+                btn.className = 'option-btn border-2 border-zinc-800 p-3 rounded-2xl font-bold text-lg text-white';
                 btn.textContent = o;
                 btn.onclick = () => handleAnswer(o === item.he, btn, item.he);
                 container.appendChild(btn);
@@ -338,6 +358,11 @@
 
         function aiAction() {
             if(!canMove) showQuiz();
+            else {
+                // לוגיקת AI פשוטה
+                let available = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+                if(available.length > 0) makeMove(available[Math.floor(Math.random() * available.length)]);
+            }
         }
     </script>
 </body>
