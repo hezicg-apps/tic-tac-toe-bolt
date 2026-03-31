@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt Aligned</title>
+    <title>Tic Tac Toe Bolt</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -38,7 +38,7 @@
             justify-content: center;
             width: 100%;
             max-width: 500px;
-            gap: 30px;
+            gap: 40px;
         }
 
         .logo-container { 
@@ -46,9 +46,7 @@
             flex-direction: column; 
             align-items: center; 
             width: 100%;
-            max-width: 320px; /* מגביל את הרוחב כדי למנוע חיתוך */
             direction: ltr; 
-            padding: 0 15px; /* מרווח ביטחון מהצדדים */
         }
 
         .neon-glow-text {
@@ -57,11 +55,11 @@
             width: 100%;
             display: flex;
             justify-content: space-between; 
-            font-size: 1.15rem; /* הקטנה קלה למניעת חיתוך */
+            font-size: 1.2rem;
             font-weight: 900;
-            margin-bottom: -10px; /* קירוב למילה BOLT */
+            margin-bottom: -5px;
             animation: neon-flicker 3s infinite ease-in-out;
-            font-style: italic;
+            /* הוסר ה-italic לבקשתך */
         }
 
         @keyframes neon-flicker {
@@ -82,7 +80,7 @@
             justify-content: center;
             line-height: 0.8;
             letter-spacing: -4px;
-            font-size: 7rem; /* התאמה לגודל הכללי */
+            font-size: 6.5rem; /* הקטנה קלה למניעת חיתוך */
             font-weight: 900;
             font-style: italic;
             color: #facc15;
@@ -90,9 +88,8 @@
         }
 
         @media (min-width: 640px) {
-            .bolt-title { font-size: 9rem; }
-            .neon-glow-text { font-size: 1.5rem; }
-            .logo-container { max-width: 450px; }
+            .bolt-title { font-size: 8rem; }
+            .neon-glow-text { font-size: 1.6rem; }
         }
 
         .bolt-o {
