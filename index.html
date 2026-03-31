@@ -31,7 +31,6 @@
             padding: 20px; 
         }
 
-        /* לוגו */
         .logo-container { 
             display: flex; 
             flex-direction: column; 
@@ -73,7 +72,6 @@
         .o-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
         .bolt-icon { position: absolute; font-size: 0.55em; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
 
-        /* כפתורים */
         .btn-main { 
             width: 320px; height: 60px; 
             display: flex; align-items: center; justify-content: center; 
@@ -92,7 +90,6 @@
             z-index: 100;
         }
 
-        /* משחק */
         .board { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
             width: 340px; height: 340px; position: relative; margin-bottom: 35px;
@@ -105,18 +102,19 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 5.5rem; /* גודל אחיד ומאוזן */
+            font-size: 5.5rem; 
             font-weight: 900; 
             width: 113px; 
             height: 113px; 
             cursor: pointer; 
             z-index: 10; 
             line-height: 1;
+            transition: opacity 0.3s ease;
         }
-        .x-style { color: #fff; text-shadow: 0 0 25px #00f2ff; }
-        .o-style { color: #fff; text-shadow: 0 0 25px #bc13fe; }
+        /* צבעים מודגשים במקום לבן */
+        .x-style { color: #00f2ff; text-shadow: 0 0 20px rgba(0,242,255,0.6); }
+        .o-style { color: #bc13fe; text-shadow: 0 0 20px rgba(188,19,254,0.6); }
 
-        /* אייקון שאלה */
         .question-trigger {
             width: 85px;
             height: 85px;
@@ -133,7 +131,6 @@
         .question-trigger.x-turn { border-color: #00f2ff; color: #00f2ff; text-shadow: 0 0 15px #00f2ff; box-shadow: 0 0 25px rgba(0,242,255,0.3); }
         .question-trigger.o-turn { border-color: #bc13fe; color: #bc13fe; text-shadow: 0 0 15px #bc13fe; box-shadow: 0 0 25px rgba(188,19,254,0.3); }
         
-        /* פוטר */
         .footer {
             position: absolute;
             bottom: 20px;
@@ -315,6 +312,7 @@
             board[i] = turn; 
             history[turn].push(i);
             
+            // בדיקת ניצחון לפני שמנקים את הסימן ה-4
             if(checkWin(board, turn)) { 
                 isGameOver = true; 
                 render(); 
@@ -322,6 +320,7 @@
                 return; 
             }
             
+            // רק אם לא היה ניצחון, מנקים את הסימן הישן (חוק ה-3)
             if(history[turn].length > 3) {
                 const oldest = history[turn].shift();
                 board[oldest] = "";
@@ -336,7 +335,9 @@
             document.querySelectorAll('.cell').forEach((c, i) => {
                 c.textContent = board[i] === "X" ? "✕" : (board[i] === "O" ? "◯" : "");
                 c.className = "cell " + (board[i] === "X" ? "x-style" : (board[i] === "O" ? "o-style" : ""));
-                if(board[i] && history[board[i]][0] === i && history[board[i]].length === 3) {
+                
+                // הפיכת הסימן שהולך להיעלם לשקוף למחצה
+                if(!isGameOver && board[i] && history[board[i]][0] === i && history[board[i]].length === 3) {
                     c.style.opacity = "0.3";
                 } else {
                     c.style.opacity = "1";
@@ -353,13 +354,33 @@
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             document.getElementById('winTitle').textContent = `ניצחון ל-${turn}!`;
             document.getElementById('winTitle').style.color = turn === 'X' ? '#00f2ff' : '#bc13fe';
-            showModal('winModal');
+            document.getElementById('statusHeader').innerHTML = `<span class="${turn==='X'?'text-[#00f2ff]':'text-[#bc13fe]'}">${turn} WINNER!</span>`;
+            setTimeout(() => showModal('winModal'), 800);
         }
 
         function aiMove() {
             if(isGameOver) return;
             const available = board.map((v,i) => v==="" ? i : null).filter(v => v!==null);
-            if(available.length > 0) makeMove(available[Math.floor(Math.random()*available.length)]);
+            if(available.length > 0) {
+                // בינה מלאכותית פשוטה: מחפשת מהלך מנצח או חסימה, אחרת רנדומלי
+                let move = available[Math.floor(Math.random()*available.length)];
+                
+                if(difficulty === 'hard') {
+                    // נסה לנצח
+                    for(let a of available) {
+                        let copy = [...board]; copy[a] = "O";
+                        if(checkWin(copy, "O")) { move = a; break; }
+                    }
+                    // נסה לחסום
+                    if(move === available[0]) {
+                        for(let a of available) {
+                            let copy = [...board]; copy[a] = "X";
+                            if(checkWin(copy, "X")) { move = a; break; }
+                        }
+                    }
+                }
+                makeMove(move);
+            }
         }
     </script>
 </body>
