@@ -19,7 +19,6 @@
             position: fixed; 
         }
         
-        /* סידור הלובי למניעת חפיפת פוטר */
         #lobby { 
             display: flex; 
             flex-direction: column; 
@@ -40,17 +39,39 @@
         }
 
         .logo-container { 
-            margin-bottom: 40px; 
+            margin-bottom: 30px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
         }
 
-        .bolt-text { margin-bottom: 15px; }
+        /* עיצוב הברק בתוך ה-O */
+        .bolt-title {
+            position: relative;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .bolt-o {
+            position: relative;
+            display: inline-block;
+        }
+
+        .lightning-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.5em; /* גודל הברק יחסית לאות O */
+            color: #ff9d00;
+            text-shadow: 0 0 15px #ff9d00;
+            z-index: 5;
+            pointer-events: none;
+        }
 
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
-        #statusHeader { margin-top: 60px; margin-bottom: 30px; }
+        #statusHeader { margin-top: 60px; margin-bottom: 20px; }
         .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; z-index: 100; cursor: pointer; color: #444; transition: 0.3s; }
         .back-btn:hover { color: #fff; }
 
@@ -93,9 +114,9 @@
 
         .footer {
             width: 100%;
-            padding: 15px 0;
+            padding: 10px 0;
             font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.4);
             text-align: center;
         }
     </style>
@@ -109,9 +130,13 @@
         
         <div class="lobby-content">
             <div class="logo-container">
-                <h1 class="text-[#00f2ff] text-4xl font-black italic mb-1">TIC TAC TOE</h1>
-                <h1 class="text-[#facc15] text-8xl font-black italic bolt-text" style="text-shadow: 0 0 30px #facc15;">BOLT</h1>
-                <div class="text-5xl">⚡</div>
+                <!-- הגדלת הכותרת העליונה -->
+                <h1 class="text-[#00f2ff] text-5xl sm:text-6xl font-black italic mb-2 tracking-tighter">TIC TAC TOE</h1>
+                
+                <!-- המילה BOLT עם הברק בתוך ה-O -->
+                <div class="bolt-title text-[#facc15] text-8xl sm:text-9xl font-black italic" style="text-shadow: 0 0 25px rgba(250, 204, 21, 0.5);">
+                    B<span class="bolt-o">O<span class="lightning-icon">⚡</span></span>LT
+                </div>
             </div>
             
             <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
@@ -243,7 +268,7 @@
             document.getElementById('speedTimer').style.width = "100%";
             clearInterval(speedInterval);
             speedInterval = setInterval(() => {
-                timeLeft -= 2;
+                timeLeft -= 2.5; /* קצת יותר מהיר - 4 שניות בערך */
                 document.getElementById('speedTimer').style.width = timeLeft + "%";
                 if(timeLeft <= 0) {
                     clearInterval(speedInterval);
