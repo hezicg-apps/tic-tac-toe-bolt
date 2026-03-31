@@ -37,8 +37,8 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 400px;
-            gap: 20px;
+            max-width: 500px;
+            gap: 30px;
         }
 
         .logo-container { 
@@ -46,8 +46,20 @@
             flex-direction: column; 
             align-items: center; 
             width: 100%;
-            /* הבטחת כיוון כתיבה משמאל לימין לאנגלית */
             direction: ltr; 
+        }
+
+        /* אפקט הבהוב ניאון תכלת לכותרת */
+        .neon-glow-text {
+            color: #00f2ff;
+            text-shadow: 0 0 5px #00f2ff, 0 0 10px #00f2ff;
+            animation: neon-pulse 2s infinite ease-in-out;
+            white-space: nowrap; /* שורה אחת בלבד */
+        }
+
+        @keyframes neon-pulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px #00f2ff, 0 0 20px #00f2ff; }
+            50% { opacity: 0.8; text-shadow: 0 0 2px #00f2ff, 0 0 5px #00f2ff; }
         }
 
         .bolt-title {
@@ -57,6 +69,7 @@
             justify-content: center;
             line-height: 0.8;
             letter-spacing: -2px;
+            margin-top: -10px;
         }
 
         .bolt-o {
@@ -81,7 +94,7 @@
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
         #statusHeader { margin-top: 40px; margin-bottom: 10px; }
-        .back-btn { position: absolute; top: 15px; left: 15px; font-size: 2rem; z-index: 100; cursor: pointer; color: #444; }
+        .back-btn { position: absolute; top: 15px; right: 15px; font-size: 2rem; z-index: 100; cursor: pointer; color: #444; transform: scaleX(-1); }
 
         .board { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
@@ -96,7 +109,8 @@
         .x-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #00f2ff, 0 0 45px #00f2ff; }
         .o-lightsaber { color: #fff; text-shadow: 0 0 7px #fff, 0 0 15px #fff, 0 0 25px #bc13fe, 0 0 45px #bc13fe; }
         
-        .btn-main { width: 100%; max-width: 280px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; border: 2px solid; cursor: pointer; background: transparent; font-size: 1.1rem; }
+        .btn-main { width: 100%; max-width: 280px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-weight: 900; border: 2px solid; cursor: pointer; background: transparent; font-size: 1.1rem; transition: all 0.2s; }
+        .btn-main:active { transform: scale(0.95); }
         
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         
@@ -109,7 +123,7 @@
             margin-top: 20px;
         }
 
-        @keyframes question-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes question-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 10px #facc15; } 50% { transform: scale(1.1); box-shadow: 0 0 30px #facc15; } }
 
         .footer {
             width: 100%;
@@ -120,20 +134,24 @@
             direction: rtl;
         }
 
+        /* עיצוב סימן השאלה - מוזז לשמאל כדי לא להפריע לטקסט */
         .help-btn {
             position: absolute;
             top: 20px;
-            right: 20px;
-            width: 35px;
-            height: 35px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid #00f2ff;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255,255,255,0.3);
+            color: #00f2ff;
             font-weight: bold;
+            font-size: 1.2rem;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            z-index: 50;
         }
 
         .timer-bar {
@@ -155,18 +173,19 @@
     <div id="speedTimer" class="timer-bar"></div>
 
     <div id="lobby">
+        <!-- סימן שאלה בצד שמאל -->
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
         
         <div class="lobby-content">
-            <!-- כפיית LTR על הלוגו כדי למנוע היפוך אותיות -->
             <div class="logo-container" dir="ltr">
-                <h1 class="text-[#00f2ff] text-5xl sm:text-6xl font-black italic tracking-tighter mb-0">TIC TAC TOE</h1>
-                <div class="bolt-title text-[#facc15] text-8xl sm:text-9xl font-black italic" style="text-shadow: 0 0 25px rgba(250, 204, 21, 0.4);">
+                <!-- כותרת בשורה אחת עם אפקט הבהוב תכלת -->
+                <h1 class="neon-glow-text text-4xl sm:text-5xl font-black italic tracking-tighter mb-2">TIC TAC TOE</h1>
+                <div class="bolt-title text-[#facc15] text-8xl sm:text-9xl font-black italic" style="text-shadow: 0 0 25px rgba(250, 204, 21, 0.6);">
                     B<span class="bolt-o">O<span class="lightning-icon">⚡</span></span>LT
                 </div>
             </div>
             
-            <div class="flex flex-col gap-3 w-full items-center">
+            <div class="flex flex-col gap-4 w-full items-center">
                 <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
                 <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
                 <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
@@ -199,7 +218,9 @@
     <div id="vocabModal" class="modal">
         <h2 class="text-[#facc15] text-2xl font-black mb-4 italic">רשימת מילים</h2>
         <textarea id="vIn" oninput="localStorage.setItem('ttt_vocab', this.value)" placeholder="apple - תפוח" class="w-full max-w-xs h-64 bg-black border-2 border-zinc-800 text-white p-4 rounded-2xl mb-4 text-right outline-none"></textarea>
-        <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור</button>
+        <div class="flex gap-2 w-full max-w-xs">
+            <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14 w-full">שמור</button>
+        </div>
     </div>
 
     <div id="winModal" class="modal text-center">
@@ -209,14 +230,14 @@
     </div>
 
     <div id="helpModal" class="modal">
-        <div class="bg-zinc-900 p-6 rounded-3xl border-2 border-[#facc15] max-w-xs text-center">
-            <h2 class="text-[#facc15] text-xl font-black mb-4">איך משחקים?</h2>
+        <div class="bg-zinc-900 p-6 rounded-3xl border-2 border-[#00f2ff] max-w-xs text-center">
+            <h2 class="text-[#00f2ff] text-xl font-black mb-4">איך משחקים?</h2>
             <ul class="text-right text-base space-y-3 mb-6 text-white">
-                <li>⚡ <b>3 סימנים בלבד:</b> הישן נעלם.</li>
-                <li>⚡ <b>חידון:</b> ענו נכון כדי לזוז.</li>
-                <li>⚡ <b>Speed:</b> רק 4 שניות לתשובה!</li>
+                <li>⚡ <b>3 סימנים בלבד:</b> כשתשימו את הרביעי, הראשון יעלם.</li>
+                <li>⚡ <b>חידון:</b> בכל תור צריך לענות נכון כדי לבצע מהלך.</li>
+                <li>⚡ <b>Speed:</b> במצב זה יש לכם רק 4 שניות לענות!</li>
             </ul>
-            <button onclick="hideModal('helpModal')" class="btn-main bg-[#facc15] text-black border-none w-full">הבנתי!</button>
+            <button onclick="hideModal('helpModal')" class="btn-main bg-[#00f2ff] text-black border-none w-full">הבנתי!</button>
         </div>
     </div>
 
@@ -248,7 +269,7 @@
         }
 
         function startGame(mode, diff = 'hard') {
-            if(!parseVocab()) { alert("נא להכניס מילים."); return; }
+            if(!parseVocab()) { alert("נא להכניס לפחות 2 מילים בפורמט: word - פירוש"); return; }
             gameMode = mode; difficulty = diff;
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('gameUI').classList.replace('hidden', 'flex');
@@ -290,9 +311,9 @@
             const container = document.getElementById('qOptions'); container.innerHTML = '';
             opts.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn border-2 border-zinc-800 p-3 rounded-2xl font-bold text-lg text-white';
+                btn.className = 'option-btn border-2 border-zinc-700 p-4 rounded-2xl font-bold text-xl text-white active:bg-zinc-800';
                 btn.textContent = o;
-                btn.onclick = () => handleAnswer(o === item.he, btn, item.he);
+                btn.onclick = () => handleAnswer(o === item.he, btn);
                 container.appendChild(btn);
             });
             showModal('quizModal');
@@ -304,21 +325,21 @@
             document.getElementById('speedTimer').style.width = "100%";
             clearInterval(speedInterval);
             speedInterval = setInterval(() => {
-                timeLeft -= 2.5;
+                timeLeft -= 2.5; // 4 שניות בסה"כ
                 document.getElementById('speedTimer').style.width = timeLeft + "%";
-                if(timeLeft <= 0) { clearInterval(speedInterval); handleAnswer(false, null, ""); }
+                if(timeLeft <= 0) { clearInterval(speedInterval); handleAnswer(false, null); }
             }, 100);
         }
 
-        function handleAnswer(isCorrect, clickedBtn, correctHe) {
+        function handleAnswer(isCorrect, clickedBtn) {
             clearInterval(speedInterval);
             document.getElementById('speedTimer').style.width = "0%";
             if(isCorrect) {
                 if(clickedBtn) clickedBtn.classList.add('bg-green-600', 'border-green-400');
-                setTimeout(() => { hideModal('quizModal'); canMove = true; document.getElementById('nextQuestionBtn').classList.add('hidden'); }, 400);
+                setTimeout(() => { hideModal('quizModal'); canMove = true; document.getElementById('nextQuestionBtn').classList.add('hidden'); }, 300);
             } else {
                 if(clickedBtn) clickedBtn.classList.add('bg-red-600', 'border-red-400');
-                setTimeout(() => { hideModal('quizModal'); switchTurn(); }, 800);
+                setTimeout(() => { hideModal('quizModal'); switchTurn(); }, 600);
             }
         }
 
@@ -359,7 +380,6 @@
         function aiAction() {
             if(!canMove) showQuiz();
             else {
-                // לוגיקת AI פשוטה
                 let available = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
                 if(available.length > 0) makeMove(available[Math.floor(Math.random() * available.length)]);
             }
