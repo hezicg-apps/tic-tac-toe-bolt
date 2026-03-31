@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic Tac Toe Bolt v. 3.1</title>
+    <title>Tic Tac Toe Bolt v. 3.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -11,8 +11,8 @@
         body, html { background: #000; color: #fff; font-family: 'Varela Round', sans-serif; margin: 0; padding: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
         #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .logo-container { margin-top: 40px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
-        .bolt-text { margin-bottom: 15px; }
+        .logo-container { margin-top: 20px; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; }
+        .bolt-text { margin-bottom: 10px; }
 
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
         
@@ -56,13 +56,19 @@
         .timer-bar { position: fixed; top: 0; left: 0; height: 10px; background: #facc15; width: 0%; z-index: 3000; box-shadow: 0 0 15px #facc15; transition: width 0.1s linear; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        /* Footer Style */
+        .footer {
+            position: absolute; bottom: 15px; font-size: 0.85rem; font-weight: bold;
+            color: rgba(255, 255, 255, 0.4); text-shadow: 0 0 5px rgba(250, 204, 21, 0.2);
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
 
     <div id="speedTimer" class="timer-bar"></div>
 
-    <!-- מסך ראשי -->
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
         <div class="logo-container">
@@ -74,9 +80,11 @@
         <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
         <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
         <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
+        
+        <!-- Footer רשמי -->
+        <div class="footer">Tic Tac Toe Bolt © פיתוח חזי כהן גלמן 2026</div>
     </div>
 
-    <!-- מסך המשחק -->
     <div id="gameUI" class="hidden flex-col items-center h-full">
         <div onclick="backToLobby()" class="back-btn">➔</div>
         <div id="statusHeader" class="text-5xl font-black italic"></div>
@@ -86,13 +94,11 @@
         </div>
     </div>
 
-    <!-- מודאל שאלה -->
     <div id="quizModal" class="modal">
         <div id="qText" class="text-7xl font-black mb-16 italic text-center" style="direction: ltr;"></div>
         <div id="qOptions" class="flex flex-col gap-5 w-80"></div>
     </div>
 
-    <!-- מודאל הסבר -->
     <div id="helpModal" class="modal">
         <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-[#facc15] max-w-sm text-center">
             <h2 class="text-[#facc15] text-2xl font-black mb-4">איך משחקים?</h2>
@@ -104,7 +110,6 @@
         </div>
     </div>
 
-    <!-- מודאל קושי (עם כפתור חזרה) -->
     <div id="aiDifficultyModal" class="modal">
         <div onclick="hideModal('aiDifficultyModal')" class="back-btn">➔</div>
         <h2 class="text-white text-3xl font-black mb-8 italic">רמת קושי</h2>
@@ -112,7 +117,6 @@
         <button onclick="hideModal('aiDifficultyModal'); startGame('pvc', 'hard')" class="btn-main border-[#bc13fe] text-[#bc13fe]">מאתגר</button>
     </div>
 
-    <!-- מודאל מילים (עם כפתור חזרה) -->
     <div id="vocabModal" class="modal">
         <div onclick="hideModal('vocabModal')" class="back-btn">➔</div>
         <h2 class="text-[#facc15] text-3xl font-black mb-4 italic">רשימת מילים</h2>
@@ -120,7 +124,6 @@
         <button onclick="hideModal('vocabModal')" class="btn-main bg-[#facc15] text-black border-none h-14">שמור</button>
     </div>
 
-    <!-- מודאל ניצחון -->
     <div id="winModal" class="modal text-center">
         <h2 id="winTitle" class="text-6xl font-black mb-6"></h2>
         <div id="winnerIcon" class="text-9xl mb-10"></div>
@@ -145,7 +148,6 @@
             hideModal('quizModal');
             document.getElementById('gameUI').classList.replace('flex', 'hidden');
             showModal('lobby');
-            // איפוס מצב משחק
             isGameOver = false;
             board = Array(9).fill("");
             history = {X:[], O:[]};
@@ -293,7 +295,7 @@
                 }
             }
             if(m !== undefined) {
-                canMove = true; // מחשב לא צריך לענות על שאלה
+                canMove = true;
                 makeMove(m);
             }
         }
@@ -313,4 +315,3 @@
     </script>
 </body>
 </html>
-
