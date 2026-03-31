@@ -27,48 +27,77 @@
             text-align: center; 
         }
 
-        /* עיצוב כותרת מותאם אישית לפי התמונה */
+        /* עיצוב כותרת "בלוק" אחיד */
         .logo-container { 
-            margin-top: 20px; 
+            margin-top: 10px; 
             margin-bottom: 40px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            width: 100%;
+            width: 90%;
+            max-width: 400px;
         }
 
         .tic-tac-toe-header {
             color: #00f2ff;
             font-weight: 900;
             font-style: italic;
-            font-size: 1.2rem;
-            letter-spacing: 0.5rem; /* ריווח רחב כמו בתמונה */
+            font-size: 2.8rem; /* הגדלה משמעותית */
+            line-height: 1;
+            letter-spacing: -0.05em;
             text-transform: uppercase;
-            margin-bottom: -10px;
+            width: 100%;
+            text-align: center;
             text-shadow: 0 0 15px #00f2ff;
+            display: flex;
+            justify-content: space-between; /* גורם למילים להיפרש על כל הרוחב */
+        }
+
+        .bolt-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .bolt-text-responsive { 
-            font-size: 22vw; /* גודל דינמי למניעת חריגה */
-            max-size: 120px;
+            font-size: 24vw; 
+            max-font-size: 130px;
             font-weight: 950;
             font-style: italic;
             color: #facc15;
-            line-height: 0.9;
+            line-height: 0.85;
             text-shadow: 0 0 30px #facc15;
-            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
         }
 
-        @media (min-width: 600px) {
-            .bolt-text-responsive { font-size: 100px; }
-            .tic-tac-toe-header { font-size: 1.8rem; letter-spacing: 0.8rem; }
+        /* הברק בתוך ה-O */
+        .o-with-bolt {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bolt-icon-inside {
+            position: absolute;
+            font-size: 0.55em;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: drop-shadow(0 0 5px #000);
+        }
+
+        @media (min-width: 500px) {
+            .bolt-text-responsive { font-size: 120px; }
+            .tic-tac-toe-header { font-size: 2.5rem; }
         }
 
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 100%; }
-        
         #statusHeader { margin-top: 60px; margin-bottom: 30px; }
         
-        /* חץ חזרה */
         .back-btn { 
             position: absolute; 
             top: 20px; 
@@ -78,7 +107,7 @@
             cursor: pointer; 
             color: #666; 
             transition: 0.3s; 
-            transform: scaleX(-1); /* היפוך כיוון החץ */
+            transform: scaleX(-1); 
         }
         .back-btn:hover { color: #fff; }
 
@@ -124,19 +153,28 @@
 
     <div id="speedTimer" class="timer-bar"></div>
 
+    <!-- מסך לובי -->
     <div id="lobby" class="modal" style="display: flex;">
         <div onclick="showModal('helpModal')" class="help-btn">?</div>
+        
         <div class="logo-container">
-            <div class="tic-tac-toe-header">TIC TAC TOE</div>
-            <div class="bolt-text-responsive">BOLT</div>
-            <div class="text-6xl">⚡</div>
+            <div class="tic-tac-toe-header">
+                <span>TIC</span><span>TAC</span><span>TOE</span>
+            </div>
+            <div class="bolt-row">
+                <div class="bolt-text-responsive">
+                    B<span class="o-with-bolt">O<span class="bolt-icon-inside">⚡</span></span>LT
+                </div>
+            </div>
         </div>
+
         <button onclick="showModal('vocabModal')" class="btn-main border-[#facc15] text-[#facc15]">הכנסת מילים / ייבוא</button>
         <button onclick="startGame('pvp')" class="btn-main border-white text-white">2 שחקנים</button>
         <button onclick="startGame('speed')" class="btn-main border-orange-500 text-orange-500">Speed Run ⚡</button>
         <button onclick="showModal('aiDifficultyModal')" class="btn-main border-[#bc13fe] text-[#bc13fe]">נגד המחשב</button>
     </div>
 
+    <!-- מסך משחק -->
     <div id="gameUI" class="hidden flex-col items-center h-full">
         <div onclick="location.reload()" class="back-btn">➔</div>
         <div id="statusHeader" class="text-5xl font-black italic"></div>
@@ -146,6 +184,7 @@
         </div>
     </div>
 
+    <!-- שאר המודלים -->
     <div id="quizModal" class="modal">
         <div id="qText" class="text-7xl font-black mb-16 italic text-center" style="direction: ltr;"></div>
         <div id="qOptions" class="flex flex-col gap-5 w-80"></div>
