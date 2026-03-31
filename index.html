@@ -48,9 +48,8 @@
             z-index: 100;
         }
 
-        /* לוגו מיושר ללא נטייה */
         .logo-container { 
-            margin-bottom: 60px; /* מרווח מוגדל מהכפתורים */
+            margin-bottom: 60px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -73,14 +72,13 @@
             letter-spacing: 2px; 
             text-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
             line-height: 0.9;
-            padding-top: 10px; /* הורדה קלה של המילה BOLT */
+            padding-top: 10px;
         }
 
-        /* כפתורים עם מרווחים משופרים */
         .btn-container {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* רווח בין הכפתורים */
+            gap: 20px; 
             width: 100%;
             align-items: center;
         }
@@ -101,7 +99,6 @@
         }
         .btn-main:active { transform: scale(0.96); }
 
-        /* לוח משחק */
         .game-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; position: relative; }
         #statusHeader { margin-bottom: 30px; min-height: 50px; font-weight: 900; font-size: 2.2rem; text-align: center; }
         .back-btn { position: absolute; top: 20px; right: 20px; font-size: 2rem; z-index: 100; cursor: pointer; color: #666; }
@@ -139,6 +136,21 @@
         #speedBar { height: 100%; width: 100%; background: #facc15; transition: width 0.1s linear; }
         
         .rules-content { max-width: 400px; text-align: right; line-height: 1.6; }
+
+        .speak-btn {
+            background: #333;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            cursor: pointer;
+            border: 2px solid #555;
+            transition: 0.2s;
+        }
+        .speak-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -165,7 +177,6 @@
         <p class="text-zinc-700 text-xs mt-12">© פיתוח חזי כהן גלמן 2026</p>
     </div>
 
-    <!-- מודאלים נשארים ללא שינוי פונקציונלי -->
     <div id="rulesModal" class="modal">
         <h2 class="text-[#facc15] text-4xl font-black mb-6">חוקי המשחק</h2>
         <ul class="rules-content text-xl text-white list-disc list-inside mb-8">
@@ -190,8 +201,9 @@
     </div>
 
     <div id="quizModal" class="modal">
-        <div id="qText" class="text-5xl font-black mb-12 text-center" style="direction: ltr;"></div>
-        <div id="qOptions" class="flex flex-col gap-4 w-full max-w-xs"></div>
+        <div id="qText" class="text-5xl font-black mb-4 text-center" style="direction: ltr;"></div>
+        <div id="speakBtnContainer"></div>
+        <div id="qOptions" class="flex flex-col gap-4 w-full max-w-xs mt-8"></div>
     </div>
 
     <div id="vocabModal" class="modal">
@@ -226,6 +238,13 @@
 
         const showModal = id => document.getElementById(id).style.display = 'flex';
         const hideModal = id => document.getElementById(id).style.display = 'none';
+
+        function speakWord(word) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
 
         function startGame(mode, diff = 'hard') {
             const raw = document.getElementById('vIn').value;
@@ -287,17 +306,30 @@
         function showQuiz() {
             if(isGameOver || canMove) return;
             const q = vocab[Math.floor(Math.random() * vocab.length)];
-            const isEn = Math.random() > 0.5;
-            const question = isEn ? q.en : q.he;
-            const answer = isEn ? q.he : q.en;
+            
+            // תמיד מציגים אנגלית כשאלה ועברית כאופציות
+            const question = q.en;
+            const answer = q.he;
+            
             document.getElementById('qText').innerText = question;
+            
+            // הוספת כפתור הקראה לשאלה (באנגלית)
+            const speakContainer = document.getElementById('speakBtnContainer');
+            speakContainer.innerHTML = '';
+            const sBtn = document.createElement('div');
+            sBtn.className = 'speak-btn';
+            sBtn.innerHTML = '🔊';
+            sBtn.onclick = () => speakWord(question);
+            speakContainer.appendChild(sBtn);
+
             const options = [answer];
             while(options.length < 3) {
                 const rand = vocab[Math.floor(Math.random() * vocab.length)];
-                const opt = isEn ? rand.he : rand.en;
+                const opt = rand.he;
                 if(!options.includes(opt)) options.push(opt);
             }
             options.sort(() => Math.random() - 0.5);
+            
             const optContainer = document.getElementById('qOptions');
             optContainer.innerHTML = '';
             options.forEach(opt => {
@@ -310,6 +342,7 @@
                 };
                 optContainer.appendChild(b);
             });
+            
             showModal('quizModal');
             if(gameMode === 'speed') startSpeedTimer();
         }
