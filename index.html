@@ -31,7 +31,7 @@
             padding: 20px; 
         }
 
-        /* לוגו - סדר וריווח משופר */
+        /* לוגו */
         .logo-container { 
             display: flex; 
             flex-direction: column; 
@@ -101,11 +101,22 @@
         .board::before { width: 6px; height: 100%; left: 33.33%; box-shadow: 113px 0 0 #fff, 0 0 10px #fff; }
         .board::after { height: 6px; width: 100%; top: 33.33%; box-shadow: 0 113px 0 #fff, 0 0 10px #fff; }
         
-        .cell { display: flex; align-items: center; justify-content: center; font-size: 6.5rem; font-weight: 900; width: 113px; height: 113px; cursor: pointer; z-index: 10; }
+        .cell { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 5.5rem; /* גודל אחיד ומאוזן */
+            font-weight: 900; 
+            width: 113px; 
+            height: 113px; 
+            cursor: pointer; 
+            z-index: 10; 
+            line-height: 1;
+        }
         .x-style { color: #fff; text-shadow: 0 0 25px #00f2ff; }
         .o-style { color: #fff; text-shadow: 0 0 25px #bc13fe; }
 
-        /* אייקון שאלה תורני */
+        /* אייקון שאלה */
         .question-trigger {
             width: 85px;
             height: 85px;
@@ -171,13 +182,16 @@
 
     <!-- ממשק משחק -->
     <div id="gameUI" class="hidden flex-col items-center justify-center h-full">
-        <div onclick="location.reload()" class="absolute top-5 right-5 text-4xl cursor-pointer text-zinc-600">➔</div>
+        <!-- חץ חזרה למסך הראשי -->
+        <div onclick="location.reload()" class="absolute top-6 left-6 text-4xl cursor-pointer text-zinc-500 hover:text-white transition-colors" style="transform: scaleX(-1);">➔</div>
+        
         <div id="statusHeader" class="text-4xl font-black italic mb-6"></div>
         <div id="mainBoard" class="board"></div>
         
         <div id="questionCircle" onclick="showQuiz()" class="question-trigger">?</div>
     </div>
 
+    <!-- מודאלים נוספים -->
     <div id="quizModal" class="modal">
         <div id="qText" class="text-6xl font-black mb-12 italic text-center" style="direction: ltr;"></div>
         <div id="qOptions" class="flex flex-col gap-4 w-full max-w-xs"></div>
