@@ -49,17 +49,18 @@
             direction: ltr; 
         }
 
+        /* עיצוב הכותרת העליונה לפי הבקשה */
         .neon-glow-text {
             color: #00f2ff;
             text-shadow: 0 0 8px #00f2ff, 0 0 15px #00f2ff;
             width: 100%;
             display: flex;
             justify-content: space-between; 
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: 900;
             margin-bottom: -5px;
+            letter-spacing: 2px;
             animation: neon-flicker 3s infinite ease-in-out;
-            /* הוסר ה-italic לבקשתך */
         }
 
         @keyframes neon-flicker {
@@ -73,23 +74,25 @@
             }
         }
 
+        /* עיצוב המילה BOLT - ללא נטייה ומוקטן למניעת חיתוך */
         .bolt-title {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             line-height: 0.8;
-            letter-spacing: -4px;
-            font-size: 6.5rem; /* הקטנה קלה למניעת חיתוך */
-            font-weight: 900;
-            font-style: italic;
+            letter-spacing: -3px;
+            font-size: 5.8rem; /* מוקטן למניעת חיתוך בניידים */
+            font-weight: 950;
+            font-style: normal; /* ללא נטייה */
             color: #facc15;
-            text-shadow: 0 0 25px rgba(250, 204, 21, 0.7);
+            text-shadow: 0 0 25px rgba(250, 204, 21, 0.5);
+            margin-top: 5px;
         }
 
         @media (min-width: 640px) {
-            .bolt-title { font-size: 8rem; }
-            .neon-glow-text { font-size: 1.6rem; }
+            .bolt-title { font-size: 7.5rem; }
+            .neon-glow-text { font-size: 1.8rem; }
         }
 
         .bolt-o {
@@ -103,7 +106,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-45%, -50%);
+            transform: translate(-50%, -50%);
             font-size: 0.45em; 
             color: #ff9d00;
             text-shadow: 0 0 20px #ff9d00;
@@ -166,11 +169,9 @@
         <div class="lobby-content">
             <div class="logo-container">
                 <div class="neon-glow-text">
-                    <span>T</span><span>I</span><span>C</span>
-                    <span>&nbsp;</span>
-                    <span>T</span><span>A</span><span>C</span>
-                    <span>&nbsp;</span>
-                    <span>T</span><span>O</span><span>E</span>
+                    <span>TIC</span>
+                    <span>TAC</span>
+                    <span>TOE</span>
                 </div>
                 <div class="bolt-title">
                     B<span class="bolt-o">O<span class="lightning-icon">⚡</span></span>LT
