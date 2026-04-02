@@ -54,6 +54,8 @@
             flex-direction: column; 
             align-items: center; 
             width: 100%;
+            /* הוספת מרווח עליון כדי שהכותרת לא תיגע בכפתור ה-? */
+            margin-top: 40px;
         }
         .tic-tac-toe-text { 
             color: #00f2ff; 
@@ -307,13 +309,11 @@
             if(isGameOver || canMove) return;
             const q = vocab[Math.floor(Math.random() * vocab.length)];
             
-            // תמיד מציגים אנגלית כשאלה ועברית כאופציות
             const question = q.en;
             const answer = q.he;
             
             document.getElementById('qText').innerText = question;
             
-            // הוספת כפתור הקראה לשאלה (באנגלית)
             const speakContainer = document.getElementById('speakBtnContainer');
             speakContainer.innerHTML = '';
             const sBtn = document.createElement('div');
